@@ -1,0 +1,19 @@
+{
+  "projects": {
+    "default": "zingoprj01-training-site"
+  },
+  "targets": {
+    "zingoprj01-training-site": {
+      "database": {
+        "default": [
+          "zingoprj01-training-site-default-rtdb"
+        ]
+      }
+    }
+  },
+  "etags": {
+    "zingoprj01-training-site": {
+      "extensionInstances": {}
+    }
+  }
+}

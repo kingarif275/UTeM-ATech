@@ -1,0 +1,82 @@
+[
+    {
+        "id": 1,
+        "name": "Dr. Mohd. Ruzaini Hashim",
+        "title": "Expert Trainer",
+        "description": "Dr. Mohd Ruzaini bin Hashim is a distinguished academic and technical specialist currently serving as a University Lecturer at the Faculty of Electrical and Electronic Engineering Technology and Deputy Director of the Centre for Continuing Education and Professional Studies at Universiti Teknikal Malaysia Melaka (UTeM). He holds a Ph.D. from the University of Sheffield and a Master’s from the University of Leeds, bringing over 15 years of extensive teaching experience in specialized fields such as Industrial Control and Automation, PLC systems, Microprocessors, and Instrumentation. As a lead researcher and innovator, Dr. Ruzaini has spearheaded numerous national projects focusing on meta-heuristic optimization algorithms and smart integrated systems, and he is the award-winning lead inventor of a patented digital water meter system. His deep expertise in both advanced engineering theory and practical industrial applications makes him an ideal lead for professional training programs aimed at enhancing technical competency in modern automation and control technologies.",
+        "photo": "/assets/trainers/ruzaini.png",
+        "banner": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        "isCertified": true,
+        "isAccredited": false
+    },
+    {
+        "id": 2,
+        "name": "Dr. Mohd Rusdy Yaacob",
+        "title": "Expert Trainer",
+        "description": "Dr. Mohd Rusdy Bin Yaacob is a highly qualified Senior Lecturer at the Faculty of Electrical Technology & Engineering, Universiti Teknikal Malaysia Melaka (UTeM), with extensive expertise in mechatronics and mechanical engineering. He holds a Ph.D. in Mechanical Engineering from the Technical University of Denmark and a Master’s in Mechatronics Engineering from the University of Siegen, Germany, grounding his technical instruction in prestigious international academic standards. With professional experience dating back to 2006, including work at ON Semiconductor, he effectively bridges the gap between academic theory and industrial practice. As an HRDC Accredited Trainer and a certified Bosch Rexroth Train-the-Trainer in Hydraulics (Level 1), Dr. Rusdy is uniquely equipped to deliver high-impact professional training tailored to the needs of the modern workforce. His combination of an advanced research background and practical certification makes him an invaluable lead for programs focusing on specialized engineering and technical skills.",
+        "photo": "/assets/trainers/Dr. Mohd Rusdy Yaacob.jpg",
+        "banner": "linear-gradient(135deg, #2af598 0%, #009efd 100%)",
+        "isCertified": true,
+        "isAccredited": true
+    },
+    {
+        "id": 3,
+        "name": "PM. IR. TS. Dr. Rozaimi Ghazali",
+        "title": "Expert Trainer",
+        "description": "Profesor Madya Ir. Ts. Dr. Rozaimi bin Ghazali is a distinguished expert in control systems engineering, industrial hydraulics, and automation, currently serving as the Head of Program at the Faculty of Electrical Engineering and Technology, Universiti Teknikal Malaysia Melaka (UTeM). With a Ph.D. from Universiti Teknologi Malaysia, he brings extensive teaching and research expertise in specialized fields such as industrial robotics, energy utilization, and advanced manufacturing systems. As a registered Professional Engineer (BEM) and Professional Technologist (MBOT), Dr. Rozaimi is a seasoned industrial consultant who has led high-level professional training programs for global industry leaders like Bosch Rexroth, focusing on basic and advanced hydraulic technology and electro-hydraulics practical training. An award-winning researcher with international recognition, including gold medals for innovative systems, his training programs are grounded in both cutting-edge academic innovation and rigorous practical application, making him an ideal lead for technical competency development in modern engineering sectors.",
+        "photo": "/assets/trainers/PM. IR. TS. Dr. Rozaimi Ghazali.jpg",
+        "banner": "linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)",
+        "isCertified": true,
+        "isAccredited": true
+    },
+    {
+        "id": 4,
+        "name": "IR. TS. Mohd Hatta Jopri",
+        "title": "Expert Trainer",
+        "description": "Ts. Dr. Mohd Hatta bin Jopri is a highly accomplished Senior Lecturer at the Faculty of Electrical Engineering and Technology, Universiti Teknikal Malaysia Melaka (UTeM), and a recognized Professional Technologist (MBOT). With a Ph.D. in Electrical Engineering and advanced academic training from RWTH Aachen University, Germany, he specializes in power systems, electrical machines, and power quality analysis. Dr. Hatta is a seasoned industrial consultant who has successfully delivered a wide range of professional training programs for global industry leaders, including Samsung SDI Energy Malaysia and Dominant Opto Technologies. His training expertise spans critical technical and management domains such as mastering 2D drafting with AutoCAD, Six Sigma methodology, maintenance leadership, and industrial automation system servicing. An award-winning researcher honored with a silver medal at MTE 2023 for his work in solar energy, Dr. Hatta combines deep theoretical knowledge with practical industrial applications to provide participants with the cutting-edge skills necessary for modern engineering excellence.",
+        "photo": "/assets/trainers/Ts. Dr. Mohd Hatta bin Jopri.jpg",
+        "banner": "linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)",
+        "isCertified": true,
+        "isAccredited": true
+    },
+    {
+        "id": 5,
+        "name": "Arman Hadi Azahar",
+        "title": "Expert Trainer",
+        "description": "Arman Hadi bin Azahar is a Senior Lecturer at the Faculty of Electrical and Engineering Technology, Universiti Teknikal Malaysia Melaka (UTeM), with extensive expertise in electrical engineering, computer-aided design (CAD), and industrial automation. A registered member of the Board of Engineers Malaysia (BEM), he has authored the \"AutoCAD 2D Step by Step Graphical Guide\" and serves as a lead researcher and inventor for various innovative technologies, including autonomous guided vehicles and smart sensing systems. Beyond his academic role, Arman is a seasoned industrial consultant who has successfully delivered professional training programs for global industry leaders such as Samsung SDI Energy Malaysia, Dominant Opto Technologies, and Bosch Rexroth. His training focuses on high-demand technical skills, including mastering 2D drafting with AutoCAD, industrial automation fabrication, and maintenance leadership, ensuring that participants receive practical, industry-aligned knowledge grounded in real-world application.",
+        "photo": "/assets/trainers/Arman Hadi bin Azahar.jpg",
+        "banner": "linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%)",
+        "isCertified": true,
+        "isAccredited": true
+    },
+    {
+        "id": 6,
+        "name": "Mohamad Haniff Harun",
+        "title": "Expert Trainer",
+        "description": "Mohamad Haniff bin Harun is a Senior Lecturer at the Faculty of Electrical Engineering and Technology, Universiti Teknikal Malaysia Melaka (UTeM), specializing in embedded systems, industrial automation, and robotics. With a robust background in technical education and research, he has authored the \"AutoCAD 2D Step by Step Graphical Guide\" and leads innovative projects in UAV navigation and autonomous systems. Beyond academia, he is an experienced industrial consultant who has delivered professional training programs for global industry leaders like Samsung SDI Energy Malaysia and Dominant Opto Technologies, focusing on mastering 2D drafting and industrial automation servicing. His dual expertise in cutting-edge research and practical industrial applications ensures a comprehensive, hands-on learning experience for participants seeking to advance their technical skills.",
+        "photo": "/assets/trainers/Mohamad Haniff bin Harun.jpg",
+        "banner": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+        "isCertified": true,
+        "isAccredited": true
+    },
+    {
+        "id": 7,
+        "name": "TS. Mustafa Manap",
+        "title": "Expert Trainer",
+        "description": "Ts. Mustafa bin Manap is a highly experienced Senior Lecturer at the Faculty of Electrical and Engineering Technology, Universiti Teknikal Malaysia Melaka (UTeM), and a recognized Professional Technologist (MBOT). With a career spanning over 15 years, he has developed deep expertise in Control System Engineering, Instrumentation, and Measurement, teaching extensively at the undergraduate level. Beyond academia, Ts. Mustafa is a seasoned industrial consultant who has led numerous professional training programs for global industry leaders, including Samsung SDI Energy Malaysia and Dominant Opto Technologies, specializing in 2D drafting with AutoCAD, industrial automation control programming, and system servicing. An award-winning researcher, he was recently honored with a silver medal at MTE 2023 for his work in solar panel cooling and has published extensively on harmonic source identification and power electronics. His combination of academic rigor and hands-on industrial experience ensures that his training programs deliver practical, high-value skills that meet the demands of modern engineering and automation sectors.",
+        "photo": "/assets/trainers/Ts. Mustafa bin Manap.jpg",
+        "banner": "linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)",
+        "isCertified": true,
+        "isAccredited": true
+    },
+    {
+        "id": 8,
+        "name": "PM. IR. Dr. Mariam Md Ghazaly",
+        "title": "Expert Trainer",
+        "description": "Associate Professor Ir. Dr. Mariam binti Md Ghazaly is a distinguished expert in mechatronics, control engineering, and industrial robotics, currently serving at Universiti Teknikal Malaysia Melaka (UTeM). Holding a Doctor of Engineering from the Tokyo Institute of Technology and recognized as a Professional Engineer (Malaysia) and Chartered Engineer (UK), she bridges advanced academic research with real-world industrial applications. As the leader of the Motion Control Research Laboratory and an HRDC Certified Trainer, she brings extensive experience in machine and actuator design, precision engineering, and system dynamics. Dr. Mariam has collaborated with leading organizations such as BMW, Infineon, and Petronas, contributed to over 30 research grants, and developed TVET modules for IR4.0. A prolific author and award-winning researcher in areas such as exoskeletons, IoT systems, and control design using MATLAB/Simulink and Arduino, she is also actively involved in training programs with institutions like SIRIM, focusing on Real-Time Control Design, Simulation, and Outcome-Based Education (OBE). Her unique blend of technical expertise, industry engagement, and hands-on teaching ensures impactful, industry-relevant professional development in automation and mechatronics.",
+        "photo": "/assets/trainers/PM. IR. Dr. Mariam Md Ghazaly.jpg",
+        "banner": "linear-gradient(135deg, #c3cfe2 0%, #c3cfe2 100%)",
+        "isCertified": true,
+        "isAccredited": false
+    }
+]
