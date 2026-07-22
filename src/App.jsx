@@ -5,6 +5,7 @@ import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import Seminars from './pages/Seminars';
 import SeminarRegistration from './pages/SeminarRegistration';
+import ActivityDashboard from './pages/ActivityDashboard';
 import PostSeminar from './pages/PostSeminar';
 import MyActivities from './pages/MyActivities';
 import TrainerProfiles from './pages/TrainerProfiles';
@@ -36,6 +37,8 @@ function App() {
               <Route path="/explore" element={<Seminars />} />
               <Route path="/search" element={<Navigate to="/explore" replace />} />
               <Route path="/register/:id" element={<SeminarRegistration />} />
+              <Route path="/dashboard" element={<ActivityDashboard />} />
+              <Route path="/activity-dashboard" element={<ActivityDashboard />} />
               <Route path="/post-seminar" element={<PostSeminar />} />
               <Route path="/create" element={<CreateChoice />} />
               <Route path="/post-collection" element={<PostCollection />} />

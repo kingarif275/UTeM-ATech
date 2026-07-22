@@ -257,6 +257,18 @@ const ProfileLayout = ({
                                     <input value={profile.username || ''} onChange={(e) => update('username', e.target.value)} />
                                 </label>
                                 <label>
+                                    Phone Number
+                                    <input value={profile.phoneNumber || ''} onChange={(e) => update('phoneNumber', e.target.value)} />
+                                </label>
+                                <label>
+                                    Profession
+                                    <input value={profile.profession || ''} onChange={(e) => update('profession', e.target.value)} />
+                                </label>
+                                <label>
+                                    Company
+                                    <input value={profile.company || ''} onChange={(e) => update('company', e.target.value)} placeholder="Optional" />
+                                </label>
+                                <label>
                                     Location
                                     <input value={profile.location || ''} onChange={(e) => update('location', e.target.value)} placeholder="Melaka, Malaysia" />
                                 </label>
@@ -269,6 +281,9 @@ const ProfileLayout = ({
                                     {isVerified && <MdOutlineVerified size={24} color="#2563eb" title="Verified" />}
                                 </div>
                                 <p className="profile-headline">{roles.join(' | ')}</p>
+                                {(profile?.profession || profile?.company) && (
+                                    <p className="profile-location">{[profile.profession, profile.company].filter(Boolean).join(' at ')}</p>
+                                )}
                                 {profile?.location && <p className="profile-location">{profile.location}</p>}
                             </>
                         )}

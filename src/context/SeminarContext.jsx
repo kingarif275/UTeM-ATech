@@ -107,9 +107,69 @@ export const SeminarProvider = ({ children }) => {
         }
     };
 
-    const registerForSeminar = async (seminarId, sessionIndices) => {
+    const registerForSeminar = async (seminarId, sessionIndices, attendee = {}) => {
         const seminar = seminars.find(s => s.id === seminarId);
         if (!seminar) return;
+
+        const registeredSessions = sessionIndices.map(idx => seminar.sessions[idx]);
+        const registrationPayload = {
+            seminarId,
+            seminarTitle: seminar.title,
+            organizer: seminar.organizer,
+            type: seminar.type,
+            locationType: seminar.locationType,
+            poster: seminar.poster || seminar.banner || '',
+            sessions: registeredSessions,
+            attendee: {
+                fullName: attendee.fullName || auth.currentUser?.displayName || '',
+                email: attendee.email || auth.currentUser?.email || '',
+                phoneNumber: attendee.phoneNumber || '',
+                profession: attendee.profession || '',
+                company: attendee.company || ''
+            },
+            registrationMethod: attendee.registrationMethod || (auth.currentUser ? 'account' : 'manual'),
+            registeredAt: new Date().toISOString(),
+            status: 'Confirmed'
+        };
+
+        if (auth.currentUser) {
+            const userRef = ref(db, `user_registrations/${auth.currentUser.uid}`);
+            const newRegRef = push(userRef);
+            const activityRegRef = push(ref(db, `activity_registrations/${seminarId}`));
+            const savedPayload = {
+                ...registrationPayload,
+                userId: auth.currentUser.uid,
+                registrationId: newRegRef.key
+            };
+            await set(newRegRef, {
+                ...savedPayload,
+                activityRegistrationId: activityRegRef.key
+            });
+            try {
+                await set(activityRegRef, savedPayload);
+            } catch (error) {
+                console.warn("Registration saved, but organizer enrollment index could not be updated:", error);
+            }
+        } else {
+            const guestRef = push(ref(db, `activity_registrations/${seminarId}`));
+            const guestPayload = {
+                ...registrationPayload,
+                registrationId: guestRef.key
+            };
+            try {
+                await set(guestRef, guestPayload);
+            } catch {
+                const legacyGuestRef = push(ref(db, `guest_registrations/${seminarId}`));
+                try {
+                    await set(legacyGuestRef, {
+                        ...guestPayload,
+                        registrationId: legacyGuestRef.key
+                    });
+                } catch {
+                    throw new Error('Registration is blocked by database permissions. Deploy the updated Realtime Database rules, then try again.');
+                }
+            }
+        }
 
         const updatedSessions = seminar.sessions.map((session, index) => {
             if (sessionIndices.includes(index)) {
@@ -118,28 +178,12 @@ export const SeminarProvider = ({ children }) => {
             return session;
         });
 
-        await update(ref(db, `seminars/${seminarId}`), {
-            sessions: updatedSessions
-        });
-
-        if (auth.currentUser) {
-            const userRef = ref(db, `user_registrations/${auth.currentUser.uid}`);
-            const newRegRef = push(userRef);
-            
-            // Map selected sessions
-            const registeredSessions = sessionIndices.map(idx => seminar.sessions[idx]);
-            
-            await set(newRegRef, {
-                seminarId,
-                seminarTitle: seminar.title,
-                organizer: seminar.organizer,
-                type: seminar.type,
-                locationType: seminar.locationType,
-                poster: seminar.poster || seminar.banner || '',
-                sessions: registeredSessions,
-                registeredAt: new Date().toISOString(),
-                status: 'Confirmed'
+        try {
+            await update(ref(db, `seminars/${seminarId}`), {
+                sessions: updatedSessions
             });
+        } catch (error) {
+            console.warn("Registration saved, but session count could not be updated:", error);
         }
     };
 
@@ -189,6 +233,20 @@ export const SeminarProvider = ({ children }) => {
         }
     };
 
+    const getActivityRegistrations = async (seminarId) => {
+        try {
+            const snapshot = await get(ref(db, `activity_registrations/${seminarId}`));
+            if (!snapshot.exists()) return [];
+            return Object.entries(snapshot.val() || {}).map(([id, value]) => ({
+                id,
+                ...value
+            })).sort((a, b) => new Date(b.registeredAt || 0) - new Date(a.registeredAt || 0));
+        } catch (error) {
+            console.error("Error fetching activity registrations:", error);
+            return [];
+        }
+    };
+
     const unlockCollection = async (collectionId) => {
         if (!auth.currentUser) return;
         const collection = collections.find(item => item.id === collectionId);
@@ -217,7 +275,7 @@ export const SeminarProvider = ({ children }) => {
     };
 
     return (
-        <SeminarContext.Provider value={{ seminars, addSeminar, registerForSeminar, getUserActivities, loading, collections, addCollection, unlockCollection, getUserCollections, loadingCollections }}>
+        <SeminarContext.Provider value={{ seminars, addSeminar, registerForSeminar, getUserActivities, getActivityRegistrations, loading, collections, addCollection, unlockCollection, getUserCollections, loadingCollections }}>
             {children}
         </SeminarContext.Provider>
     );

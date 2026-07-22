@@ -22,6 +22,7 @@ import {
     MdOutlineSearch,
     MdOutlineLocalActivity, 
     MdOutlineAddCircleOutline, 
+    MdOutlineDashboard,
     MdOutlineEvent, 
     MdOutlineVerified, 
     MdOutlineLogout, 
@@ -342,6 +343,7 @@ const Navbar = () => {
                         <Link to="/explore" className="nav-link">Explore</Link>
                         <Link to="/collection" className="nav-link">Collection</Link>
                         <Link to="/create" className="nav-link">Create</Link>
+                        {user && isVerified && <Link to="/dashboard" className="nav-link">Dashboard</Link>}
                     </div>
                 </div>
 
@@ -748,12 +750,22 @@ const Navbar = () => {
                         </div>
                         <div 
                             onClick={() => { setDrawerOpen(false); navigate('/create'); }}
-                            style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                            style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', borderBottom: user && isVerified ? '1px solid #f3f4f6' : 'none', cursor: 'pointer' }}
                         >
                             <MdOutlineAddCircleOutline size={20} style={{ marginRight: '16px' }} />
                             <span style={{ fontSize: '15px', fontWeight: '600', color: '#000000', flex: 1 }}>Create</span>
                             <MdOutlineKeyboardArrowRight size={20} color="#ccc" style={{ flexShrink: 0 }} />
                         </div>
+                        {user && isVerified && (
+                            <div
+                                onClick={() => { setDrawerOpen(false); navigate('/dashboard'); }}
+                                style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                            >
+                                <MdOutlineDashboard size={20} style={{ marginRight: '16px' }} />
+                                <span style={{ fontSize: '15px', fontWeight: '600', color: '#000000', flex: 1 }}>Dashboard</span>
+                                <MdOutlineKeyboardArrowRight size={20} color="#ccc" style={{ flexShrink: 0 }} />
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ height: '24px' }} />

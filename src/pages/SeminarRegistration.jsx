@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useSeminars } from '../context/SeminarContext';
-import { auth } from '../firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { auth, googleProvider } from '../firebase';
+import { onAuthStateChanged, signInWithPopup } from 'firebase/auth';
 import { generateGoogleCalendarUrl } from '../utils/calendar';
+import { ensureUserProfile } from '../utils/userProfiles';
 
 const isOnlineActivity = (activity) => ['online', 'Online', 'Google Meet'].includes(activity?.locationType);
 
@@ -20,29 +21,42 @@ const SeminarRegistration = () => {
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
-        jobTitle: '',
+        phoneNumber: '',
+        profession: '',
         company: ''
     });
+    const [enrollmentMode, setEnrollmentMode] = useState('manual');
     const [submitted, setSubmitted] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
     const [userAuthChecked, setUserAuthChecked] = useState(false);
     const [selectedSessionIndices, setSelectedSessionIndices] = useState([]);
+    const [submitError, setSubmitError] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
     React.useEffect(() => {
         document.title = 'UTeM ATech - Register for Activity';
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            if (!currentUser) {
-                navigate('/login');
-            } else {
-                setUserAuthChecked(true);
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            setCurrentUser(currentUser);
+            setUserAuthChecked(true);
+            if (currentUser) {
+                let profile = null;
+                try {
+                    profile = await ensureUserProfile(currentUser);
+                } catch (error) {
+                    console.warn('Could not load profile details for registration:', error);
+                }
                 setFormData(prev => ({
                     ...prev,
-                    fullName: prev.fullName || currentUser.displayName || '',
-                    email: prev.email || currentUser.email || ''
+                    fullName: prev.fullName || profile?.name || currentUser.displayName || '',
+                    email: prev.email || profile?.email || currentUser.email || '',
+                    phoneNumber: prev.phoneNumber || profile?.phoneNumber || '',
+                    profession: prev.profession || profile?.profession || '',
+                    company: prev.company || profile?.company || ''
                 }));
             }
         });
         return () => unsubscribe();
-    }, [navigate]);
+    }, []);
 
     if (loading) {
         return (
@@ -73,14 +87,65 @@ const SeminarRegistration = () => {
         ));
     };
 
-    const handleSubmit = (event) => {
+    const fillFromAccount = async (user = currentUser) => {
+        if (!user) return;
+        let profile = null;
+        try {
+            profile = await ensureUserProfile(user);
+        } catch (error) {
+            console.warn('Could not load account profile for registration:', error);
+        }
+        setFormData(prev => ({
+            ...prev,
+            fullName: profile?.name || user.displayName || prev.fullName,
+            email: profile?.email || user.email || prev.email,
+            phoneNumber: profile?.phoneNumber || prev.phoneNumber,
+            profession: profile?.profession || prev.profession,
+            company: profile?.company || prev.company
+        }));
+    };
+
+    const handleGoogleLogin = async () => {
+        try {
+            setSubmitError('');
+            const result = await signInWithPopup(auth, googleProvider);
+            await ensureUserProfile(result.user);
+            setCurrentUser(result.user);
+            setEnrollmentMode('account');
+            await fillFromAccount(result.user);
+        } catch (error) {
+            setSubmitError(error.message);
+        }
+    };
+
+    const goToLogin = () => {
+        navigate('/login', {
+            state: {
+                returnTo: `/register/${seminar.id}`,
+                seminar
+            }
+        });
+    };
+
+    const handleSubmit = async (event) => {
         event.preventDefault();
+        setSubmitError('');
         if (selectedSessionIndices.length === 0) {
             alert('Please select at least one session to register.');
             return;
         }
-        registerForSeminar(seminar.id, selectedSessionIndices);
-        setTimeout(() => setSubmitted(true), 1000);
+        try {
+            setSubmitting(true);
+            await registerForSeminar(seminar.id, selectedSessionIndices, {
+                ...formData,
+                registrationMethod: enrollmentMode === 'account' && currentUser ? 'account' : 'manual'
+            });
+            setSubmitted(true);
+        } catch (error) {
+            setSubmitError(error.message);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     if (submitted) {
@@ -256,7 +321,83 @@ const SeminarRegistration = () => {
                     </div>
                 </div>
 
+                <div style={{ background: '#f8fafc', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '24px', marginBottom: '24px' }}>
+                    <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 8px' }}>Enrollment Method</h2>
+                    <p style={{ color: 'var(--text-light)', lineHeight: 1.6, margin: '0 0 18px' }}>
+                        Enter attendee details manually, or use a saved account profile to complete the form faster.
+                    </p>
+                    <div style={{
+                        position: 'relative',
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        width: '100%',
+                        maxWidth: '520px',
+                        background: '#e5e7eb',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '999px',
+                        padding: '4px',
+                        marginBottom: enrollmentMode === 'account' ? '18px' : 0,
+                    }}>
+                        <span style={{
+                            position: 'absolute',
+                            top: '4px',
+                            bottom: '4px',
+                            left: enrollmentMode === 'manual' ? '4px' : 'calc(50% + 0px)',
+                            width: 'calc(50% - 4px)',
+                            borderRadius: '999px',
+                            background: '#ffffff',
+                            boxShadow: '0 6px 18px rgba(15, 23, 42, 0.12)',
+                            transition: 'left 0.22s ease',
+                        }} />
+                        <button
+                            type="button"
+                            onClick={() => setEnrollmentMode('manual')}
+                            style={{ position: 'relative', zIndex: 1, border: 0, background: 'transparent', padding: '12px 14px', borderRadius: '999px', color: enrollmentMode === 'manual' ? '#111827' : '#6b7280', fontWeight: 900, cursor: 'pointer', fontFamily: 'inherit' }}
+                        >
+                            Enter Attendee Details
+                        </button>
+                        <button
+                            type="button"
+                            onClick={async () => {
+                                setEnrollmentMode('account');
+                                if (currentUser) await fillFromAccount();
+                            }}
+                            style={{ position: 'relative', zIndex: 1, border: 0, background: 'transparent', padding: '12px 14px', borderRadius: '999px', color: enrollmentMode === 'account' ? '#111827' : '#6b7280', fontWeight: 900, cursor: 'pointer', fontFamily: 'inherit' }}
+                        >
+                            Use Account Profile
+                        </button>
+                    </div>
+                    {enrollmentMode === 'account' && (
+                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                            {currentUser ? (
+                                <button type="button" className="btn btn-primary" onClick={() => fillFromAccount()}>
+                                    Refresh Account Details
+                                </button>
+                            ) : (
+                                <>
+                                    <button type="button" className="btn btn-primary" onClick={goToLogin}>
+                                        Continue with UTeM ATech
+                                    </button>
+                                    <button type="button" className="btn btn-google" style={{ width: 'auto', padding: '12px 18px' }} onClick={handleGoogleLogin}>
+                                        Continue with Google
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    )}
+                    {enrollmentMode === 'account' && currentUser && (!formData.phoneNumber || !formData.profession) && (
+                        <p style={{ color: '#92400e', background: '#fef3c7', borderRadius: '12px', padding: '10px 12px', margin: '14px 0 0', fontWeight: 700, fontSize: '13px' }}>
+                            Your account profile is missing phone number or profession. Add them below once, then save your account profile later.
+                        </p>
+                    )}
+                </div>
+
                 <form onSubmit={handleSubmit} className="profile-card" style={{ padding: '32px' }}>
+                    {submitError && (
+                        <p style={{ color: '#b91c1c', background: '#fee2e2', borderRadius: '12px', padding: '12px 14px', margin: '0 0 20px', fontWeight: 700 }}>
+                            {submitError}
+                        </p>
+                    )}
                     <div className="grid-2" style={{ width: '100%', marginBottom: '24px' }}>
                         <div className="form-group">
                             <label className="form-label">Full Name</label>
@@ -280,29 +421,41 @@ const SeminarRegistration = () => {
                         </div>
                     </div>
 
-                    <div className="grid-2" style={{ width: '100%', marginBottom: '32px' }}>
+                    <div className="grid-2" style={{ width: '100%', marginBottom: '24px' }}>
                         <div className="form-group">
-                            <label className="form-label">Job Title</label>
+                            <label className="form-label">Phone Number</label>
                             <input
-                                type="text"
+                                type="tel"
                                 className="form-input"
-                                value={formData.jobTitle}
-                                onChange={event => setFormData({ ...formData, jobTitle: event.target.value })}
+                                required
+                                value={formData.phoneNumber}
+                                onChange={event => setFormData({ ...formData, phoneNumber: event.target.value })}
                             />
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Company</label>
+                            <label className="form-label">Profession</label>
                             <input
                                 type="text"
                                 className="form-input"
-                                value={formData.company}
-                                onChange={event => setFormData({ ...formData, company: event.target.value })}
+                                required
+                                value={formData.profession}
+                                onChange={event => setFormData({ ...formData, profession: event.target.value })}
                             />
                         </div>
                     </div>
 
-                    <button type="submit" className="btn btn-primary btn-block" disabled={selectedSessionIndices.length === 0}>
-                        Confirm Registration
+                    <div className="form-group" style={{ marginBottom: '32px' }}>
+                        <label className="form-label">Company (optional)</label>
+                        <input
+                            type="text"
+                            className="form-input"
+                            value={formData.company}
+                            onChange={event => setFormData({ ...formData, company: event.target.value })}
+                        />
+                    </div>
+
+                    <button type="submit" className="btn btn-primary btn-block" disabled={selectedSessionIndices.length === 0 || submitting}>
+                        {submitting ? 'Confirming...' : 'Confirm Registration'}
                     </button>
                 </form>
             </div>

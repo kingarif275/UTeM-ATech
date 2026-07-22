@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { auth, googleProvider } from '../firebase';
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { FcGoogle } from 'react-icons/fc';
@@ -11,6 +11,9 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
+    const returnTo = location.state?.returnTo || '/';
+    const returnState = location.state?.seminar ? { seminar: location.state.seminar } : undefined;
 
     useEffect(() => {
         document.title = "UTeM ATech - Login";
@@ -21,7 +24,7 @@ const Login = () => {
         try {
             const result = await signInWithEmailAndPassword(auth, email, password);
             await ensureUserProfile(result.user);
-            navigate('/');
+            navigate(returnTo, { replace: true, state: returnState });
         } catch (err) {
             setError(err.message);
         }
@@ -31,7 +34,7 @@ const Login = () => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             await ensureUserProfile(result.user);
-            navigate('/');
+            navigate(returnTo, { replace: true, state: returnState });
         } catch (err) {
             setError(err.message);
         }

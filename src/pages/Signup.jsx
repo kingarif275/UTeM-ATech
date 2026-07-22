@@ -4,12 +4,16 @@ import { auth, googleProvider } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
 import { FcGoogle } from 'react-icons/fc';
 import Navbar from '../components/Navbar';
-import { ensureUserProfile } from '../utils/userProfiles';
+import { ensureUserProfile, updateUserProfileData } from '../utils/userProfiles';
 
 const Signup = () => {
     const [name, setName] = useState('');
+    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [profession, setProfession] = useState('');
+    const [company, setCompany] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -27,6 +31,13 @@ const Signup = () => {
                 email: userCredential.user.email,
                 displayName: name,
                 photoURL: userCredential.user.photoURL
+            });
+            await updateUserProfileData(userCredential.user.uid, {
+                name,
+                username,
+                phoneNumber,
+                profession,
+                company
             });
             navigate('/');
         } catch (err) {
@@ -75,6 +86,17 @@ const Signup = () => {
 
                             <div className="form-group">
                                 <input
+                                    type="text"
+                                    className="form-input"
+                                    placeholder="Username"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <input
                                     type="email"
                                     className="form-input"
                                     placeholder="Email"
@@ -93,6 +115,38 @@ const Signup = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     minLength={6}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <input
+                                    type="tel"
+                                    className="form-input"
+                                    placeholder="Phone Number"
+                                    value={phoneNumber}
+                                    onChange={(e) => setPhoneNumber(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    placeholder="Profession"
+                                    value={profession}
+                                    onChange={(e) => setProfession(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    placeholder="Company (optional)"
+                                    value={company}
+                                    onChange={(e) => setCompany(e.target.value)}
                                 />
                             </div>
 

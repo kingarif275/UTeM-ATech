@@ -315,6 +315,7 @@ const PostSeminar = () => {
             banner: bannerUrl,
             poster: posterUrl,
             organizer: organizerName,
+            creatorId: ownerId,
             logo: logoUrl,
             isOrganizerVerified: true
         };

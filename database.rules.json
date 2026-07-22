@@ -14,6 +14,7 @@
         "location": { ".validate": "newData.isString() && newData.val().length <= 300" },
         "locationType": { ".validate": "newData.isString() && (newData.val() === 'physical' || newData.val() === 'online' || newData.val() === 'Physical' || newData.val() === 'Online' || newData.val() === 'Google Meet')" },
         "price": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+        "creatorId": { ".validate": "!newData.exists() || (newData.isString() && (newData.val() === auth.uid || root.child('users').child(auth.uid).child('isAdmin').val() === true))" },
         "sessions": { ".validate": "newData.hasChildren()" },
         "$other": { ".validate": true }
       }
@@ -33,6 +34,69 @@
       }
     },
 
+    "activity_registrations": {
+      "$seminar_id": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('isAdmin').val() === true || root.child('seminars').child($seminar_id).child('creatorId').val() === auth.uid || root.child('seminars').child($seminar_id).child('organizer').val() === root.child('users').child(auth.uid).child('name').val())",
+        "$registration_id": {
+          ".write": "!data.exists() && newData.exists() && (!newData.child('userId').exists() || (auth != null && newData.child('userId').val() === auth.uid))",
+          ".validate": "newData.hasChildren(['seminarId', 'seminarTitle', 'attendee', 'sessions', 'registrationMethod', 'registeredAt', 'status']) && newData.child('seminarId').val() === $seminar_id",
+          "seminarId": { ".validate": "newData.isString()" },
+          "seminarTitle": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 150" },
+          "organizer": { ".validate": "newData.isString() && newData.val().length <= 100" },
+          "type": { ".validate": "newData.isString() && newData.val().length <= 60" },
+          "locationType": { ".validate": "newData.isString() && newData.val().length <= 60" },
+          "poster": { ".validate": "newData.isString() && newData.val().length <= 2000" },
+          "sessions": { ".validate": "newData.hasChildren()" },
+          "attendee": {
+            ".validate": "newData.hasChildren(['fullName', 'email'])",
+            "fullName": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120" },
+            "email": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$/)" },
+            "phoneNumber": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" },
+            "profession": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120" },
+            "company": { ".validate": "newData.isString() && newData.val().length <= 160" },
+            "$other": { ".validate": false }
+          },
+          "registrationMethod": { ".validate": "newData.val() === 'manual' || newData.val() === 'account'" },
+          "registrationId": { ".validate": "newData.isString()" },
+          "userId": { ".validate": "newData.isString()" },
+          "registeredAt": { ".validate": "newData.isString()" },
+          "status": { ".validate": "newData.val() === 'Confirmed'" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
+    "guest_registrations": {
+      "$seminar_id": {
+        ".read": "auth != null && root.child('users').child(auth.uid).child('isAdmin').val() === true",
+        "$registration_id": {
+          ".write": "!data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['seminarId', 'seminarTitle', 'attendee', 'sessions', 'registrationMethod', 'registeredAt', 'status']) && newData.child('seminarId').val() === $seminar_id",
+          "seminarId": { ".validate": "newData.isString()" },
+          "seminarTitle": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 150" },
+          "organizer": { ".validate": "newData.isString() && newData.val().length <= 100" },
+          "type": { ".validate": "newData.isString() && newData.val().length <= 60" },
+          "locationType": { ".validate": "newData.isString() && newData.val().length <= 60" },
+          "poster": { ".validate": "newData.isString() && newData.val().length <= 2000" },
+          "sessions": { ".validate": "newData.hasChildren()" },
+          "attendee": {
+            ".validate": "newData.hasChildren(['fullName', 'email'])",
+            "fullName": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120" },
+            "email": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$/)" },
+            "phoneNumber": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" },
+            "profession": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120" },
+            "company": { ".validate": "newData.isString() && newData.val().length <= 160" },
+            "$other": { ".validate": false }
+          },
+          "registrationMethod": { ".validate": "newData.val() === 'manual'" },
+          "registrationId": { ".validate": "newData.isString()" },
+          "registeredAt": { ".validate": "newData.isString()" },
+          "status": { ".validate": "newData.val() === 'Confirmed'" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
     "users": {
       ".read": "auth != null",
       ".indexOn": ["email", "username", "isVerified", "isAdmin", "isBanned"],
@@ -45,6 +109,18 @@
         "username": {
           ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
           ".validate": "newData.isString() && newData.val().length <= 30"
+        },
+        "phoneNumber": {
+          ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "profession": {
+          ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
+          ".validate": "newData.isString() && newData.val().length <= 120"
+        },
+        "company": {
+          ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('isAdmin').val() === true)",
+          ".validate": "newData.isString() && newData.val().length <= 160"
         },
         "email": {
           ".write": "auth != null && ((auth.uid === $uid && (!data.exists() || newData.val() === data.val())) || root.child('users').child(auth.uid).child('isAdmin').val() === true)",

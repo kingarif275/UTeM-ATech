@@ -81,6 +81,16 @@ const CreateChoice = () => {
                     <p style={{ fontSize: '18px', color: '#666666' }}>
                         Choose what resource you want to publish.
                     </p>
+                    {isVerified && (
+                        <button
+                            type="button"
+                            className="nav-btn-outline"
+                            onClick={() => navigate('/dashboard')}
+                            style={{ marginTop: '18px', padding: '12px 18px' }}
+                        >
+                            Open Activity Dashboard
+                        </button>
+                    )}
                 </div>
 
                 <div style={{ display: 'grid', gap: '48px', maxWidth: '1180px' }}>
