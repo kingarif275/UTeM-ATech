@@ -42,6 +42,14 @@ const BellIcon = () => (
     </svg>
 );
 
+const MoreIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="1" />
+        <circle cx="19" cy="12" r="1" />
+        <circle cx="5" cy="12" r="1" />
+    </svg>
+);
+
 const Navbar = () => {
     const [user, setUser] = useState(null);
     const [profile, setProfile] = useState(null);
@@ -59,11 +67,13 @@ const Navbar = () => {
     const [showPermBanner, setShowPermBanner] = useState(false);
     const [navSearch, setNavSearch] = useState('');
     const [searchOpen, setSearchOpen] = useState(false);
+    const [moreOpen, setMoreOpen] = useState(false);
     const [activeSearchIndex, setActiveSearchIndex] = useState(0);
     const [searchableUsers, setSearchableUsers] = useState([]);
     const [, forceUpdate] = useState(0);
     const notifRef = useRef(null);
     const searchRef = useRef(null);
+    const moreRef = useRef(null);
     const reminderTimeoutsRef = useRef([]);
 
     useEffect(() => {
@@ -178,6 +188,9 @@ const Navbar = () => {
             }
             if (searchRef.current && !searchRef.current.contains(event.target)) {
                 setSearchOpen(false);
+            }
+            if (moreRef.current && !moreRef.current.contains(event.target)) {
+                setMoreOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -333,9 +346,9 @@ const Navbar = () => {
             <nav className="navbar">
                 {/* Left: logos + links */}
                 <div className="nav-left">
-                    <Link to="/" className="nav-logo" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <img className="nav-logo-img" src={utemLogo} alt="UTeM Logo" style={{ height: '49px', width: 'auto', objectFit: 'contain' }} />
-                        <img className="nav-logo-img" src={atechLogo} alt="ATech Logo" style={{ height: '49px', width: 'auto', objectFit: 'contain' }} />
+                    <Link to="/" className="nav-logo">
+                        <img className="nav-logo-img nav-logo-utem" src={utemLogo} alt="UTeM Logo" />
+                        <img className="nav-logo-img nav-logo-atech" src={atechLogo} alt="ATech Logo" />
                     </Link>
 
                     <div className="nav-links">
@@ -344,11 +357,19 @@ const Navbar = () => {
                         <Link to="/register" className="nav-link">Register</Link>
                         <Link to="/trainers" className="nav-link">Trainers</Link>
                         <Link to="/collection" className="nav-link">Publications</Link>
-                        <Link to="/corporate-training" className="nav-link">Corporate Training</Link>
-                        <Link to="/news-gallery" className="nav-link">News/Gallery</Link>
-                        <Link to="/contact" className="nav-link">Contact</Link>
-                        <Link to="/create" className="nav-link">Organizer Portal</Link>
-                        {user && isVerified && <Link to="/dashboard" className="nav-link">Dashboard</Link>}
+                        <div className="nav-more" ref={moreRef}>
+                            <button type="button" className="nav-more-trigger" onClick={() => setMoreOpen(value => !value)}>
+                                More <MoreIcon />
+                            </button>
+                            {moreOpen && (
+                                <div className="nav-more-menu">
+                                    <Link to="/corporate-training" onClick={() => setMoreOpen(false)}>Corporate Training</Link>
+                                    <Link to="/news-gallery" onClick={() => setMoreOpen(false)}>News/Gallery</Link>
+                                    <Link to="/contact" onClick={() => setMoreOpen(false)}>Contact</Link>
+                                    <Link to="/create" onClick={() => setMoreOpen(false)}>Organizer Portal</Link>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -529,6 +550,17 @@ const Navbar = () => {
 
                     {user && (
                         <div className="nav-shortcuts" aria-label="Personal shortcuts">
+                            {isVerified && (
+                                <button
+                                    type="button"
+                                    className="nav-shortcut-btn"
+                                    title="Organizer Dashboard"
+                                    onClick={() => navigate('/dashboard')}
+                                >
+                                    <MdOutlineDashboard size={18} />
+                                    <span className="nav-shortcut-label">Dashboard</span>
+                                </button>
+                            )}
                             <button
                                 type="button"
                                 className="nav-shortcut-btn"
