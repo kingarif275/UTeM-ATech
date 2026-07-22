@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import ActivityCard from '../components/ActivityCard';
 import { useSeminars } from '../context/SeminarContext';
 import { useTrainers } from '../context/TrainerContext';
 import { LAUNCH_PROGRAMME, PUBLICATIONS, QUICK_TRAINING_FILTERS, TRAINING_CATEGORIES } from '../data/atechContent';
@@ -89,23 +90,11 @@ const Home = () => {
                     <SectionHeader title="Featured / Upcoming Training" action="View All Training" onClick={() => navigate('/register')} />
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '18px' }}>
                         {upcoming.map(programme => (
-                            <article key={programme.id} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', background: '#ffffff' }}>
-                                <div style={{ aspectRatio: '16 / 9', background: '#0b2d5c', position: 'relative' }}>
-                                    <img src={programme.banner || programme.poster || heroImage} alt={programme.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    <span style={{ position: 'absolute', top: '12px', left: '12px', background: '#2e8b57', color: '#ffffff', borderRadius: '999px', padding: '6px 10px', fontSize: '11px', fontWeight: 900 }}>ATech Verified</span>
-                                </div>
-                                <div style={{ padding: '18px' }}>
-                                    <h3 style={{ color: '#0b2d5c', fontWeight: 900, lineHeight: 1.25, minHeight: '64px', margin: '0 0 12px' }}>{programme.title}</h3>
-                                    <p style={{ color: '#4b5563', margin: '0 0 12px', lineHeight: 1.55 }}>{programme.organizer || 'ATech UTeM'}</p>
-                                    <p style={{ color: '#1f2937', fontWeight: 800, margin: '0 0 14px' }}>
-                                        {programme.sessions?.[0]?.date || LAUNCH_PROGRAMME.date} - {programme.sessions?.[0]?.startTime || '8:00'} to {programme.sessions?.[0]?.endTime || '17:00'} - {programme.locationType || 'Microsoft Teams'}
-                                    </p>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-                                        <span style={{ color: '#0b2d5c', fontWeight: 900 }}>{programme.price === 0 ? 'Free' : `RM ${programme.studentPrice || programme.price} / RM ${programme.price}`}</span>
-                                        <button className="btn btn-primary" type="button" onClick={() => navigate(`/register/${programme.id}`, { state: { seminar: programme } })} style={{ padding: '10px 14px' }}>Reserve Your Seat</button>
-                                    </div>
-                                </div>
-                            </article>
+                            <ActivityCard
+                                key={programme.id}
+                                seminar={programme}
+                                onClick={() => navigate(`/register/${programme.id}`, { state: { seminar: programme } })}
+                            />
                         ))}
                     </div>
                 </section>
