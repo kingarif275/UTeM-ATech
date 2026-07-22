@@ -32,7 +32,7 @@ const TrainerProfiles = () => {
         <div style={{ minHeight: '100vh', background: '#ffffff' }}>
             <Navbar />
             
-            <div className="container page-content" style={{ paddingBottom: '60px' }}>
+            <div className="container page-content" style={{ paddingTop: '150px', paddingBottom: '60px' }}>
                 <PageTitle eyebrow="ATech Experts" title="Trainers" align="center">
                         Meet the industry leaders and academic pioneers who guide our training programs with expertise and passion.
                 </PageTitle>
