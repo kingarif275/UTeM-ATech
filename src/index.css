@@ -7,7 +7,7 @@
   --bg-light: #ffffff;
   --bg-white: #ffffff;
   --border-color: #e5e5e5;
-  --font-family: "Outfit", sans-serif;
+  --font-family: "Montserrat", sans-serif;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 24px;
@@ -27,6 +27,8 @@ input:-webkit-autofill:active {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: var(--font-family) !important;
+  font-weight: 700 !important;
 }
 
 body {
