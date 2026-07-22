@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { db, auth } from '../firebase';
 import { ref, onValue, set, push, update, get } from 'firebase/database';
+import { LAUNCH_PROGRAMME, REGISTRATION_STATUSES } from '../data/atechContent';
 
 const SeminarContext = createContext();
 
@@ -35,6 +36,12 @@ const splitCollectionForStorage = (collection) => {
     });
 
     return { publicCollection, privateCollection };
+};
+
+const makeRegistrationReference = () => {
+    const year = new Date().getFullYear();
+    const serial = String(Date.now()).slice(-6).padStart(6, '0');
+    return `ATR-${year}-${serial}`;
 };
 
 export const SeminarProvider = ({ children }) => {
@@ -108,7 +115,15 @@ export const SeminarProvider = ({ children }) => {
     };
 
     const registerForSeminar = async (seminarId, sessionIndices, attendee = {}) => {
-        const seminar = seminars.find(s => s.id === seminarId);
+        const seminar = seminars.find(s => s.id === seminarId) || (seminarId === 'launch-minitab' ? {
+            id: 'launch-minitab',
+            title: LAUNCH_PROGRAMME.title,
+            organizer: LAUNCH_PROGRAMME.trainer,
+            type: 'Workshop',
+            locationType: LAUNCH_PROGRAMME.platform,
+            poster: '',
+            sessions: [{ name: LAUNCH_PROGRAMME.mode, date: LAUNCH_PROGRAMME.rawDate, startTime: '08:00', endTime: '17:00', quota: 40, registered: 0 }]
+        } : null);
         if (!seminar) return;
 
         const registeredSessions = sessionIndices.map(idx => seminar.sessions[idx]);
@@ -124,12 +139,17 @@ export const SeminarProvider = ({ children }) => {
                 fullName: attendee.fullName || auth.currentUser?.displayName || '',
                 email: attendee.email || auth.currentUser?.email || '',
                 phoneNumber: attendee.phoneNumber || '',
-                profession: attendee.profession || '',
-                company: attendee.company || ''
+                role: attendee.role || attendee.profession || '',
+                organization: attendee.organization || attendee.company || '',
+                registrationCategory: attendee.registrationCategory || '',
+                remarks: attendee.remarks || ''
             },
             registrationMethod: attendee.registrationMethod || (auth.currentUser ? 'account' : 'manual'),
+            referenceNumber: makeRegistrationReference(),
             registeredAt: new Date().toISOString(),
-            status: 'Confirmed'
+            status: REGISTRATION_STATUSES[0],
+            paymentStatus: 'Pending Review',
+            nextAction: 'ATech will review your reservation and send payment instructions.'
         };
 
         if (auth.currentUser) {
@@ -171,19 +191,21 @@ export const SeminarProvider = ({ children }) => {
             }
         }
 
-        const updatedSessions = seminar.sessions.map((session, index) => {
-            if (sessionIndices.includes(index)) {
-                return { ...session, registered: (session.registered || 0) + 1 };
-            }
-            return session;
-        });
-
-        try {
-            await update(ref(db, `seminars/${seminarId}`), {
-                sessions: updatedSessions
+        if (seminars.some(s => s.id === seminarId)) {
+            const updatedSessions = seminar.sessions.map((session, index) => {
+                if (sessionIndices.includes(index)) {
+                    return { ...session, registered: (session.registered || 0) + 1 };
+                }
+                return session;
             });
-        } catch (error) {
-            console.warn("Registration saved, but session count could not be updated:", error);
+
+            try {
+                await update(ref(db, `seminars/${seminarId}`), {
+                    sessions: updatedSessions
+                });
+            } catch (error) {
+                console.warn("Registration saved, but session count could not be updated:", error);
+            }
         }
     };
 

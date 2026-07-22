@@ -15,6 +15,7 @@ import Navbar from '../components/Navbar';
 import { auth, db, storage } from '../firebase';
 import { useSeminars } from '../context/SeminarContext';
 import { ensureUserProfile } from '../utils/userProfiles';
+import { PROGRAMME_STATUSES, REGISTRATION_STATUSES } from '../data/atechContent';
 
 const activityTypes = ['All', 'Event', 'Seminar', 'Workshop', 'Conference', 'Webinar', 'Meetup'];
 
@@ -25,11 +26,15 @@ const buildRows = (registrations, seminarTitle) => {
         const sessions = registration.sessions?.length ? registration.sessions : [{}];
         return sessions.map((session, index) => ({
             activity: seminarTitle,
+            registrationId: registration.id || registration.registrationId || '',
             name: registration.attendee?.fullName || '',
             email: registration.attendee?.email || '',
             phone: registration.attendee?.phoneNumber || '',
-            profession: registration.attendee?.profession || '',
-            company: registration.attendee?.company || '',
+            role: registration.attendee?.role || registration.attendee?.profession || '',
+            organization: registration.attendee?.organization || registration.attendee?.company || '',
+            category: registration.attendee?.registrationCategory || '',
+            reference: registration.referenceNumber || '',
+            paymentStatus: registration.paymentStatus || '',
             method: registration.registrationMethod || '',
             status: registration.status || '',
             registeredAt: registration.registeredAt || '',
@@ -43,8 +48,8 @@ const buildRows = (registrations, seminarTitle) => {
 };
 
 const downloadCsv = (filename, rows) => {
-    const headers = ['Activity', 'Full Name', 'Email', 'Phone Number', 'Profession', 'Company', 'Method', 'Status', 'Registered At', 'Session', 'Session Date', 'Start Time', 'End Time', 'Session Time'];
-    const keys = ['activity', 'name', 'email', 'phone', 'profession', 'company', 'method', 'status', 'registeredAt', 'sessionName', 'sessionDate', 'sessionStart', 'sessionEnd', 'sessionTime'];
+    const headers = ['Activity', 'Reference', 'Full Name', 'Email', 'Phone Number', 'Role', 'Organisation / University', 'Category', 'Method', 'Status', 'Payment Status', 'Registered At', 'Session', 'Session Date', 'Start Time', 'End Time', 'Session Time'];
+    const keys = ['activity', 'reference', 'name', 'email', 'phone', 'role', 'organization', 'category', 'method', 'status', 'paymentStatus', 'registeredAt', 'sessionName', 'sessionDate', 'sessionStart', 'sessionEnd', 'sessionTime'];
     const body = rows.map(row => keys.map(key => csvEscape(row[key])).join(',')).join('\n');
     const blob = new Blob([[headers.join(','), body].join('\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -154,6 +159,7 @@ const ActivityDashboard = () => {
                 locationType: selectedActivity.locationType || 'Physical',
                 location: selectedActivity.location || '',
                 price: selectedActivity.price || 0,
+                programmeStatus: selectedActivity.programmeStatus || 'Open',
                 banner: selectedActivity.banner || '',
                 poster: selectedActivity.poster || ''
             });
@@ -189,6 +195,7 @@ const ActivityDashboard = () => {
                 locationType: draft.locationType,
                 location: draft.location,
                 price: Number(draft.price || 0),
+                programmeStatus: draft.programmeStatus,
                 banner: draft.banner,
                 poster: draft.poster
             });
@@ -206,8 +213,8 @@ const ActivityDashboard = () => {
             return;
         }
 
-        const headers = ['Activity', 'Full Name', 'Email', 'Phone Number', 'Profession', 'Company', 'Method', 'Status', 'Registered At', 'Session', 'Session Date', 'Start Time', 'End Time', 'Session Time'];
-        const keys = ['activity', 'name', 'email', 'phone', 'profession', 'company', 'method', 'status', 'registeredAt', 'sessionName', 'sessionDate', 'sessionStart', 'sessionEnd', 'sessionTime'];
+        const headers = ['Activity', 'Reference', 'Full Name', 'Email', 'Phone Number', 'Role', 'Organisation / University', 'Category', 'Method', 'Status', 'Payment Status', 'Registered At', 'Session', 'Session Date', 'Start Time', 'End Time', 'Session Time'];
+        const keys = ['activity', 'reference', 'name', 'email', 'phone', 'role', 'organization', 'category', 'method', 'status', 'paymentStatus', 'registeredAt', 'sessionName', 'sessionDate', 'sessionStart', 'sessionEnd', 'sessionTime'];
         const tsv = [headers.join('\t'), ...rows.map(row => keys.map(key => row[key] ?? '').join('\t'))].join('\n');
         const html = `
             <table>
@@ -234,6 +241,30 @@ const ActivityDashboard = () => {
         } catch {
             alert('Could not copy the table. Use Export CSV instead.');
         }
+    };
+
+    const updateRegistrationStatus = async (registration, nextStatus) => {
+        if (!selectedActivity || !registration?.id) return;
+        const paymentStatus = nextStatus === 'Payment Received' || nextStatus === 'Registration Confirmed'
+            ? 'Payment Recorded'
+            : nextStatus === 'Payment Invitation Sent'
+                ? 'Payment Requested'
+                : registration.paymentStatus || 'Pending Review';
+        const nextAction = nextStatus === 'Registration Confirmed'
+            ? 'Seat confirmed. Please wait for training reminders.'
+            : nextStatus === 'Certificate Ready'
+                ? 'Certificate is ready for collection or download.'
+                : 'ATech will update the next step after review.';
+        const payload = { status: nextStatus, paymentStatus, nextAction };
+        await update(dbRef(db, `activity_registrations/${selectedActivity.id}/${registration.id}`), payload);
+        if (registration.userId && registration.registrationId) {
+            try {
+                await update(dbRef(db, `user_registrations/${registration.userId}/${registration.registrationId}`), payload);
+            } catch (error) {
+                console.warn('Could not sync attendee registration copy:', error);
+            }
+        }
+        setRegistrations(items => items.map(item => item.id === registration.id ? { ...item, ...payload } : item));
     };
 
     if (checkingAccess || loading) {
@@ -359,7 +390,7 @@ const ActivityDashboard = () => {
                                                         <label className="form-group">
                                                             <span className="form-label">Location Type</span>
                                                             <select className="form-input" value={draft.locationType} onChange={event => setDraft({ ...draft, locationType: event.target.value })}>
-                                                                <option value="Google Meet">Google Meet</option>
+                                                                <option value="Microsoft Teams">Microsoft Teams</option>
                                                                 <option value="Physical">Physical</option>
                                                                 <option value="Online">Online</option>
                                                             </select>
@@ -369,6 +400,12 @@ const ActivityDashboard = () => {
                                                             <input className="form-input" type="number" min="0" value={draft.price} onChange={event => setDraft({ ...draft, price: event.target.value })} />
                                                         </label>
                                                     </div>
+                                                    <label className="form-group">
+                                                        <span className="form-label">Programme Status</span>
+                                                        <select className="form-input" value={draft.programmeStatus} onChange={event => setDraft({ ...draft, programmeStatus: event.target.value })}>
+                                                            {PROGRAMME_STATUSES.map(status => <option key={status} value={status}>{status}</option>)}
+                                                        </select>
+                                                    </label>
                                                     <label className="form-group">
                                                         <span className="form-label">Location or Meeting Link</span>
                                                         <input className="form-input" value={draft.location} onChange={event => setDraft({ ...draft, location: event.target.value })} />
@@ -425,7 +462,7 @@ const ActivityDashboard = () => {
                                                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: sheetMode ? '1320px' : '1120px', fontSize: sheetMode ? '13px' : '14px' }}>
                                                     <thead>
                                                         <tr style={{ background: sheetMode ? '#f3f4f6' : '#ffffff', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.04em', fontSize: '11px' }}>
-                                                            {['Full Name', 'Email', 'Phone', 'Profession', 'Company', 'Method', 'Session', 'Date', 'Start', 'End'].map(label => (
+                                                            {['Reference', 'Full Name', 'Email', 'Phone', 'Role', 'Organisation / University', 'Category', 'Method', 'Status', 'Payment', 'Session', 'Date', 'Start', 'End'].map(label => (
                                                                 <th key={label} style={{ padding: sheetMode ? '10px' : '14px 16px', textAlign: 'left', border: sheetMode ? '1px solid #d1d5db' : 0 }}>{label}</th>
                                                             ))}
                                                         </tr>
@@ -433,8 +470,26 @@ const ActivityDashboard = () => {
                                                     <tbody>
                                                         {rows.map((row, index) => (
                                                             <tr key={`${row.email}-${index}`} style={{ borderTop: sheetMode ? 0 : '1px solid #eef2f7' }}>
-                                                                {[row.name, row.email, row.phone, row.profession, row.company, row.method, row.sessionName, row.sessionDate, row.sessionStart, row.sessionEnd].map((value, cellIndex) => (
-                                                                    <td key={cellIndex} style={{ padding: sheetMode ? '9px 10px' : '14px 16px', border: sheetMode ? '1px solid #d1d5db' : 0, color: '#111827', whiteSpace: cellIndex === 1 ? 'nowrap' : 'normal' }}>
+                                                                {[row.reference, row.name, row.email, row.phone, row.role, row.organization, row.category, row.method].map((value, cellIndex) => (
+                                                                    <td key={cellIndex} style={{ padding: sheetMode ? '9px 10px' : '14px 16px', border: sheetMode ? '1px solid #d1d5db' : 0, color: '#111827', whiteSpace: cellIndex === 2 ? 'nowrap' : 'normal' }}>
+                                                                        {value || '-'}
+                                                                    </td>
+                                                                ))}
+                                                                <td style={{ padding: sheetMode ? '9px 10px' : '14px 16px', border: sheetMode ? '1px solid #d1d5db' : 0 }}>
+                                                                    <select
+                                                                        className="form-input"
+                                                                        style={{ minWidth: '190px', padding: '8px 10px', fontSize: '12px' }}
+                                                                        value={registrations.find(item => item.id === row.registrationId)?.status || row.status || 'Registration Received'}
+                                                                        onChange={event => {
+                                                                            const reg = registrations.find(item => item.referenceNumber === row.reference || item.attendee?.email === row.email);
+                                                                            updateRegistrationStatus(reg, event.target.value);
+                                                                        }}
+                                                                    >
+                                                                        {REGISTRATION_STATUSES.map(status => <option key={status} value={status}>{status}</option>)}
+                                                                    </select>
+                                                                </td>
+                                                                {[row.paymentStatus, row.sessionName, row.sessionDate, row.sessionStart, row.sessionEnd].map((value, cellIndex) => (
+                                                                    <td key={`tail-${cellIndex}`} style={{ padding: sheetMode ? '9px 10px' : '14px 16px', border: sheetMode ? '1px solid #d1d5db' : 0, color: '#111827' }}>
                                                                         {value || '-'}
                                                                     </td>
                                                                 ))}

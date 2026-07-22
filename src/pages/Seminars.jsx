@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import { useSeminars } from '../context/SeminarContext';
 import { getAvatarColor, getInitials } from '../utils/avatar';
 import { getCountdownString, isWithin24Hours, parseSessionDate } from '../utils/notifications';
+import { LAUNCH_PROGRAMME, QUICK_TRAINING_FILTERS, TRAINING_CATEGORIES } from '../data/atechContent';
 
 const formatDate = (dateStr) => {
     if (!dateStr || dateStr === 'TBA') return 'TBA';
@@ -68,8 +69,9 @@ const OrganizerAvatar = ({ seminar }) => {
 
 const ActivityCard = ({ seminar, onClick }) => {
     const bgUrl = seminar.poster || seminar.banner;
-    const isOnline = ['online', 'Online', 'Google Meet'].includes(seminar.locationType);
-    const locationText = isOnline ? 'Online' : (seminar.location || 'Venue TBA');
+    const isOnline = ['online', 'Online', 'Microsoft Teams', 'Google Meet'].includes(seminar.locationType);
+    const locationText = isOnline ? (seminar.locationType === 'Microsoft Teams' ? 'Microsoft Teams' : 'Online') : (seminar.location || 'Venue TBA');
+    const status = seminar.programmeStatus || 'Open';
 
     return (
         <div
@@ -97,6 +99,7 @@ const ActivityCard = ({ seminar, onClick }) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                         <span className="activity-chip">{seminar.type || 'Seminar'}</span>
+                        {(seminar.isOrganizerVerified || seminar.atechVerified) && <span className="activity-chip verified">ATech Verified</span>}
                         <span className={`activity-chip ${seminar.price === 0 ? 'free' : 'paid'}`}>
                             {seminar.price === 0 ? 'FREE' : `RM ${seminar.price || 0}`}
                         </span>
@@ -119,6 +122,12 @@ const ActivityCard = ({ seminar, onClick }) => {
                             {isOnline ? 'ONLINE' : 'PHYSICAL'}
                         </span>
                     </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', marginTop: '14px' }}>
+                        <span style={{ color: '#ffffff', fontSize: '12px', fontWeight: 900 }}>{status}</span>
+                        <span style={{ background: '#f47a20', color: '#ffffff', borderRadius: '999px', padding: '8px 12px', fontSize: '12px', fontWeight: 900 }}>
+                            Reserve Your Seat
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -132,26 +141,64 @@ const Seminars = () => {
     const query = new URLSearchParams(location.search).get('search') || '';
     const [searchTerm, setSearchTerm] = useState(query);
     const [selectedType, setSelectedType] = useState('All');
+    const [selectedQuickFilter, setSelectedQuickFilter] = useState('All');
 
     useEffect(() => {
-        document.title = 'UTeM ATech - Explore';
+        document.title = 'UTeM ATech - Register';
     }, []);
 
     useEffect(() => {
         setSearchTerm(query);
     }, [query]);
 
-    const filteredSeminars = seminars.filter(seminar => {
+    const visibleSeminars = seminars.length ? seminars : [{
+        id: 'launch-minitab',
+        title: LAUNCH_PROGRAMME.title,
+        type: 'Workshop',
+        category: LAUNCH_PROGRAMME.category,
+        description: LAUNCH_PROGRAMME.overview,
+        organizer: LAUNCH_PROGRAMME.trainer,
+        locationType: LAUNCH_PROGRAMME.platform,
+        price: LAUNCH_PROGRAMME.feeNonStudent,
+        studentPrice: LAUNCH_PROGRAMME.feeStudent,
+        programmeStatus: LAUNCH_PROGRAMME.status,
+        courseCode: LAUNCH_PROGRAMME.code,
+        atechVerified: true,
+        sessions: [{ name: LAUNCH_PROGRAMME.mode, date: LAUNCH_PROGRAMME.rawDate, startTime: '08:00', endTime: '17:00', quota: 40, registered: 0 }],
+        banner: 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=1400&q=80',
+        poster: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=80'
+    }];
+
+    const filteredSeminars = visibleSeminars.filter(seminar => {
         const title = seminar.title || '';
         const organizer = seminar.organizer || '';
+        const category = seminar.category || '';
+        const description = seminar.description || '';
+        const topics = seminar.topics || '';
+        const trainer = seminar.trainer || seminar.organizer || '';
         const searchLower = searchTerm.toLowerCase();
         const matchesSearch = title.toLowerCase().includes(searchLower) ||
-            organizer.toLowerCase().includes(searchLower);
+            organizer.toLowerCase().includes(searchLower) ||
+            category.toLowerCase().includes(searchLower) ||
+            description.toLowerCase().includes(searchLower) ||
+            topics.toLowerCase().includes(searchLower) ||
+            trainer.toLowerCase().includes(searchLower);
         const matchesType = selectedType === 'All' || seminar.type === selectedType;
-        return matchesSearch && matchesType;
+        const quick = selectedQuickFilter;
+        const isFree = Number(seminar.price || 0) === 0;
+        const isOnline = ['online', 'Online', 'Microsoft Teams', 'Google Meet'].includes(seminar.locationType);
+        const matchesQuick = quick === 'All'
+            || seminar.type === quick
+            || seminar.category === quick
+            || (quick === 'Free' && isFree)
+            || (quick === 'Paid' && !isFree)
+            || (quick === 'Online' && isOnline)
+            || (quick === 'Physical' && !isOnline)
+            || (quick === 'HRD Corp Claimable' && seminar.hrdCorpClaimable);
+        return matchesSearch && matchesType && matchesQuick;
     });
 
-    const upcomingSeminars = seminars
+    const upcomingSeminars = visibleSeminars
         .filter(seminar => seminar.sessions?.some(session => parseSessionDate(session.date, session.startTime) > new Date()))
         .sort((a, b) => {
             const aIsEvent = a.type === 'Event' ? 0 : 1;
@@ -189,7 +236,7 @@ const Seminars = () => {
                         color: 'var(--text-dark)',
                         letterSpacing: '-0.03em',
                     }}>
-                        Explore
+                        Register
                     </h1>
                     <p className="hero-subtitle" style={{
                         fontSize: '18px',
@@ -199,13 +246,13 @@ const Seminars = () => {
                         margin: '0 0 36px',
                         lineHeight: '1.6',
                     }}>
-                        Explore activities, seminars, workshops, and conferences from top organizers.
+                        Reserve seats for ATech Verified training, workshops, seminars, and engineering programmes.
                     </p>
 
                     <div style={{ width: '100%', margin: '0 0 24px', position: 'relative' }}>
                         <input
                             type="text"
-                            placeholder="Search by topic or organizer..."
+                            placeholder="Search by programme, topic, trainer, category, or keyword..."
                             className="form-input"
                             style={{
                                 padding: '14px 52px 14px 20px',
@@ -243,7 +290,7 @@ const Seminars = () => {
                         </div>
                     )}
 
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
                         {activityTypes.map(type => (
                             <button
                                 key={type}
@@ -263,6 +310,28 @@ const Seminars = () => {
                                 }}
                             >
                                 {type}
+                            </button>
+                        ))}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        {['All', ...QUICK_TRAINING_FILTERS, ...TRAINING_CATEGORIES].map(filter => (
+                            <button
+                                key={filter}
+                                onClick={() => setSelectedQuickFilter(filter)}
+                                style={{
+                                    padding: '7px 14px',
+                                    borderRadius: '999px',
+                                    border: '1px solid',
+                                    borderColor: selectedQuickFilter === filter ? '#f47a20' : 'var(--border-color)',
+                                    background: selectedQuickFilter === filter ? '#fff7ed' : 'white',
+                                    color: selectedQuickFilter === filter ? '#9a3412' : 'var(--text-dark)',
+                                    cursor: 'pointer',
+                                    fontWeight: '700',
+                                    fontSize: '12px',
+                                    fontFamily: 'inherit',
+                                }}
+                            >
+                                {filter}
                             </button>
                         ))}
                     </div>

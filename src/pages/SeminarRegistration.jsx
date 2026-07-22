@@ -6,8 +6,9 @@ import { auth, googleProvider } from '../firebase';
 import { onAuthStateChanged, signInWithPopup } from 'firebase/auth';
 import { generateGoogleCalendarUrl } from '../utils/calendar';
 import { ensureUserProfile } from '../utils/userProfiles';
+import { REGISTRATION_CATEGORIES, ROLE_OPTIONS } from '../data/atechContent';
 
-const isOnlineActivity = (activity) => ['online', 'Online', 'Google Meet'].includes(activity?.locationType);
+const isOnlineActivity = (activity) => ['online', 'Online', 'Microsoft Teams', 'Google Meet'].includes(activity?.locationType);
 
 const SeminarRegistration = () => {
     const { state } = useLocation();
@@ -22,8 +23,11 @@ const SeminarRegistration = () => {
         fullName: '',
         email: '',
         phoneNumber: '',
-        profession: '',
-        company: ''
+        role: '',
+        organization: '',
+        registrationCategory: '',
+        remarks: '',
+        declarationAccepted: false
     });
     const [enrollmentMode, setEnrollmentMode] = useState('manual');
     const [submitted, setSubmitted] = useState(false);
@@ -50,8 +54,8 @@ const SeminarRegistration = () => {
                     fullName: prev.fullName || profile?.name || currentUser.displayName || '',
                     email: prev.email || profile?.email || currentUser.email || '',
                     phoneNumber: prev.phoneNumber || profile?.phoneNumber || '',
-                    profession: prev.profession || profile?.profession || '',
-                    company: prev.company || profile?.company || ''
+                    role: prev.role || profile?.role || profile?.profession || '',
+                    organization: prev.organization || profile?.organization || profile?.company || ''
                 }));
             }
         });
@@ -75,7 +79,7 @@ const SeminarRegistration = () => {
                 <Navbar />
                 <div className="container page-content" style={{ textAlign: 'center' }}>
                     <h2>Activity not found</h2>
-                    <button className="btn btn-primary" onClick={() => navigate('/explore')}>Back to Explore</button>
+                    <button className="btn btn-primary" onClick={() => navigate('/register')}>Back to Register</button>
                 </div>
             </>
         );
@@ -100,8 +104,8 @@ const SeminarRegistration = () => {
             fullName: profile?.name || user.displayName || prev.fullName,
             email: profile?.email || user.email || prev.email,
             phoneNumber: profile?.phoneNumber || prev.phoneNumber,
-            profession: profile?.profession || prev.profession,
-            company: profile?.company || prev.company
+            role: profile?.role || profile?.profession || prev.role,
+            organization: profile?.organization || profile?.company || prev.organization
         }));
     };
 
@@ -136,6 +140,10 @@ const SeminarRegistration = () => {
         }
         try {
             setSubmitting(true);
+            if (!formData.declarationAccepted) {
+                alert('Please accept the registration declaration before reserving your seat.');
+                return;
+            }
             await registerForSeminar(seminar.id, selectedSessionIndices, {
                 ...formData,
                 registrationMethod: enrollmentMode === 'account' && currentUser ? 'account' : 'manual'
@@ -168,9 +176,9 @@ const SeminarRegistration = () => {
                             <polyline points="20 6 9 17 4 12" />
                         </svg>
                     </div>
-                    <h2 style={{ fontSize: '32px', marginBottom: '16px', fontWeight: '800', letterSpacing: '-0.02em' }}>Registration Confirmed!</h2>
+                    <h2 style={{ fontSize: '32px', marginBottom: '16px', fontWeight: '800', letterSpacing: 0 }}>Registration Received</h2>
                     <p style={{ color: 'var(--text-light)', marginBottom: '32px' }}>
-                        You are registered for <strong>{seminar.title}</strong>.
+                        Your reservation for <strong>{seminar.title}</strong> has been received. Payment instructions will be sent after review. The seat is confirmed only after payment.
                     </p>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px', maxWidth: '400px', width: '100%' }}>
@@ -200,8 +208,8 @@ const SeminarRegistration = () => {
                         })}
                     </div>
 
-                    <button className="btn btn-primary" onClick={() => navigate('/explore')}>
-                        Browse Activities
+                    <button className="btn btn-primary" onClick={() => navigate('/register')}>
+                        Browse Training
                     </button>
                 </div>
             </>
@@ -385,9 +393,9 @@ const SeminarRegistration = () => {
                             )}
                         </div>
                     )}
-                    {enrollmentMode === 'account' && currentUser && (!formData.phoneNumber || !formData.profession) && (
+                    {enrollmentMode === 'account' && currentUser && (!formData.phoneNumber || !formData.role) && (
                         <p style={{ color: '#92400e', background: '#fef3c7', borderRadius: '12px', padding: '10px 12px', margin: '14px 0 0', fontWeight: 700, fontSize: '13px' }}>
-                            Your account profile is missing phone number or profession. Add them below once, then save your account profile later.
+                            Your account profile is missing phone number or role. Add them below once, then save your account profile later.
                         </p>
                     )}
                 </div>
@@ -433,29 +441,67 @@ const SeminarRegistration = () => {
                             />
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Profession</label>
+                            <label className="form-label">Role</label>
+                            <select
+                                className="form-input"
+                                required
+                                value={formData.role}
+                                onChange={event => setFormData({ ...formData, role: event.target.value })}
+                            >
+                                <option value="">Select your role</option>
+                                {ROLE_OPTIONS.map(role => <option key={role} value={role}>{role}</option>)}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="grid-2" style={{ width: '100%', marginBottom: '24px' }}>
+                        <div className="form-group">
+                            <label className="form-label">Organisation / University</label>
                             <input
                                 type="text"
                                 className="form-input"
                                 required
-                                value={formData.profession}
-                                onChange={event => setFormData({ ...formData, profession: event.target.value })}
+                                value={formData.organization}
+                                onChange={event => setFormData({ ...formData, organization: event.target.value })}
                             />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Registration Category</label>
+                            <select
+                                className="form-input"
+                                required
+                                value={formData.registrationCategory}
+                                onChange={event => setFormData({ ...formData, registrationCategory: event.target.value })}
+                            >
+                                <option value="">Select category</option>
+                                {REGISTRATION_CATEGORIES.map(category => <option key={category} value={category}>{category}</option>)}
+                            </select>
                         </div>
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: '32px' }}>
-                        <label className="form-label">Company (optional)</label>
+                    <div className="form-group" style={{ marginBottom: '18px' }}>
+                        <label className="form-label">Remarks (optional)</label>
                         <input
                             type="text"
                             className="form-input"
-                            value={formData.company}
-                            onChange={event => setFormData({ ...formData, company: event.target.value })}
+                            value={formData.remarks}
+                            onChange={event => setFormData({ ...formData, remarks: event.target.value })}
                         />
                     </div>
 
+                    <label style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '28px', color: '#374151', lineHeight: 1.5, fontWeight: 700 }}>
+                        <input
+                            type="checkbox"
+                            checked={formData.declarationAccepted}
+                            onChange={event => setFormData({ ...formData, declarationAccepted: event.target.checked })}
+                            required
+                            style={{ marginTop: '4px' }}
+                        />
+                        I confirm that the information provided is accurate. I understand that this is a seat reservation and payment instructions will be sent after review.
+                    </label>
+
                     <button type="submit" className="btn btn-primary btn-block" disabled={selectedSessionIndices.length === 0 || submitting}>
-                        {submitting ? 'Confirming...' : 'Confirm Registration'}
+                        {submitting ? 'Reserving...' : 'Reserve My Seat'}
                     </button>
                 </form>
             </div>

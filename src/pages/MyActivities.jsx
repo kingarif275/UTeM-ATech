@@ -48,6 +48,7 @@ const MyActivityCard = ({ activity }) => {
         `https://ui-avatars.com/api/?name=${encodeURIComponent(activity.organizer || 'O')}&background=1a56db&color=fff`;
     const locationText = activity.location || activity.locationType || 'TBA';
     const sessions = activity.sessions || [];
+    const status = activity.status || 'Registration Received';
 
     return (
         <div
@@ -77,7 +78,7 @@ const MyActivityCard = ({ activity }) => {
             <div className="activity-card-content">
                 {/* Top row: type badge + date chips */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    {/* Left: type + confirmed */}
+                    {/* Left: type + registration status */}
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                         <span style={{
                             background: 'rgba(255,255,255,0.18)',
@@ -102,7 +103,7 @@ const MyActivityCard = ({ activity }) => {
                             color: '#dcfce7',
                             border: '1px solid rgba(34,197,94,0.4)',
                         }}>
-                            ✓ CONFIRMED
+                            {status}
                         </span>
                     </div>
 
@@ -163,6 +164,9 @@ const MyActivityCard = ({ activity }) => {
                             <span className="location-pill">
                                 📍 {locationText}
                             </span>
+                            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.86)', margin: '6px 0 0', fontWeight: 800 }}>
+                                Ref: {activity.referenceNumber || activity.registrationId || '-'} - Payment: {activity.paymentStatus || 'Pending Review'}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -176,7 +180,7 @@ const SessionRow = ({ session, activity }) => {
     const calendarUrl = generateGoogleCalendarUrl({
         title: activity.seminarTitle,
         description: `${session.name || 'Session'} on ${session.date}`,
-        location: (activity.locationType === 'Online' || activity.locationType === 'Google Meet') ? activity.location || 'Online' : activity.location,
+        location: (activity.locationType === 'Online' || activity.locationType === 'Microsoft Teams' || activity.locationType === 'Google Meet') ? activity.location || activity.locationType || 'Online' : activity.location,
         date: session.date,
         startTime: session.startTime,
         endTime: session.endTime,
@@ -446,8 +450,8 @@ const MyActivities = () => {
                                         ? "You don't have any upcoming registered activities." 
                                         : "You don't have any past registered activities."}
                                 </p>
-                                <button className="btn btn-primary" onClick={() => navigate('/explore')}>
-                                    Find Activities
+                                <button className="btn btn-primary" onClick={() => navigate('/register')}>
+                                    Register for Training
                                 </button>
                             </div>
                         ) : (

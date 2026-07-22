@@ -18,6 +18,7 @@ import UserProfile from './pages/UserProfile';
 import Users from './pages/Users';
 import AdminVerification from './pages/AdminVerification';
 import AdminUsers from './pages/AdminUsers';
+import PublicInfoPage from './pages/PublicInfoPage';
 import { UserRoleProvider } from './context/UserRoleContext';
 import { SeminarProvider } from './context/SeminarContext';
 import { TrainerProvider } from './context/TrainerContext';
@@ -33,10 +34,17 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/seminars" element={<Seminars />} />
-              <Route path="/explore" element={<Seminars />} />
-              <Route path="/search" element={<Navigate to="/explore" replace />} />
+              <Route path="/register" element={<Seminars />} />
+              <Route path="/training" element={<Seminars />} />
+              <Route path="/seminars" element={<Navigate to="/register" replace />} />
+              <Route path="/explore" element={<Navigate to="/register" replace />} />
+              <Route path="/search" element={<Navigate to="/register" replace />} />
               <Route path="/register/:id" element={<SeminarRegistration />} />
+              <Route path="/about" element={<PublicInfoPage type="about" />} />
+              <Route path="/corporate-training" element={<PublicInfoPage type="corporate" />} />
+              <Route path="/news-gallery" element={<PublicInfoPage type="news" />} />
+              <Route path="/contact" element={<PublicInfoPage type="contact" />} />
+              <Route path="/publications/:slug" element={<PublicInfoPage type="publication" />} />
               <Route path="/dashboard" element={<ActivityDashboard />} />
               <Route path="/activity-dashboard" element={<ActivityDashboard />} />
               <Route path="/post-seminar" element={<PostSeminar />} />

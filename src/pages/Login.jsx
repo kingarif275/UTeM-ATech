@@ -47,8 +47,13 @@ const Login = () => {
                 <div className="container auth-container">
                     <div className="auth-left">
                         <div className="auth-header">
-                            <h1 className="auth-title">Welcome Back</h1>
-                            <p className="auth-subtitle">Please enter your details to sign in</p>
+                            <h1 className="auth-title">Welcome to ATech UTeM</h1>
+                            <p className="auth-subtitle">Access your training activities, registrations, and organizer tools.</p>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '22px' }}>
+                            <button type="button" className="nav-btn-outline" onClick={() => navigate('/my-activities')}>Attendee Login</button>
+                            <button type="button" className="nav-btn-outline" onClick={() => navigate('/dashboard')}>Organizer Login</button>
                         </div>
 
                         {error && <p style={{ color: 'red', marginBottom: '16px' }}>{error}</p>}
@@ -95,19 +100,19 @@ const Login = () => {
                         </button>
 
                         <div className="auth-footer">
-                            Don't have an account? <Link to="/signup" className="auth-link">Sign up</Link>
+                            Creating activities? <Link to="/signup" className="auth-link">Create organizer account</Link>
                         </div>
                     </div>
 
                     <div className="auth-right">
                         <img
-                            src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1950&q=80"
-                            alt="Workspace"
+                            src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=1400&q=80"
+                            alt="Engineering training"
                             className="auth-image"
                         />
                         <div className="auth-overlay">
-                            <h2 className="overlay-title">Build Your Dream Team</h2>
-                            <p className="overlay-text">Connect with top talent and get things done.</p>
+                            <h2 className="overlay-title">ATech Verified Training</h2>
+                            <p className="overlay-text">Reserve first. Review. Invite payment. Confirm seat.</p>
                         </div>
                     </div>
                 </div>

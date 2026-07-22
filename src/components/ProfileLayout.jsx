@@ -10,6 +10,7 @@ import {
     roleOptions,
     shouldShowFaculty
 } from '../utils/profileOptions';
+import { ROLE_OPTIONS } from '../data/atechContent';
 
 const cardStyle = {
     background: '#ffffff',
@@ -261,12 +262,15 @@ const ProfileLayout = ({
                                     <input value={profile.phoneNumber || ''} onChange={(e) => update('phoneNumber', e.target.value)} />
                                 </label>
                                 <label>
-                                    Profession
-                                    <input value={profile.profession || ''} onChange={(e) => update('profession', e.target.value)} />
+                                    Role
+                                    <select value={profile.role || profile.profession || ''} onChange={(e) => update('role', e.target.value)}>
+                                        <option value="">Select role</option>
+                                        {ROLE_OPTIONS.map(option => <option key={option} value={option}>{option}</option>)}
+                                    </select>
                                 </label>
                                 <label>
-                                    Company
-                                    <input value={profile.company || ''} onChange={(e) => update('company', e.target.value)} placeholder="Optional" />
+                                    Organisation / University
+                                    <input value={profile.organization || profile.company || ''} onChange={(e) => update('organization', e.target.value)} />
                                 </label>
                                 <label>
                                     Location
@@ -281,8 +285,8 @@ const ProfileLayout = ({
                                     {isVerified && <MdOutlineVerified size={24} color="#2563eb" title="Verified" />}
                                 </div>
                                 <p className="profile-headline">{roles.join(' | ')}</p>
-                                {(profile?.profession || profile?.company) && (
-                                    <p className="profile-location">{[profile.profession, profile.company].filter(Boolean).join(' at ')}</p>
+                                {(profile?.role || profile?.profession || profile?.organization || profile?.company) && (
+                                    <p className="profile-location">{[profile.role || profile.profession, profile.organization || profile.company].filter(Boolean).join(' at ')}</p>
                                 )}
                                 {profile?.location && <p className="profile-location">{profile.location}</p>}
                             </>

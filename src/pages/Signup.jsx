@@ -5,6 +5,7 @@ import { createUserWithEmailAndPassword, signInWithPopup, updateProfile } from '
 import { FcGoogle } from 'react-icons/fc';
 import Navbar from '../components/Navbar';
 import { ensureUserProfile, updateUserProfileData } from '../utils/userProfiles';
+import { ROLE_OPTIONS } from '../data/atechContent';
 
 const Signup = () => {
     const [name, setName] = useState('');
@@ -12,8 +13,8 @@ const Signup = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
-    const [profession, setProfession] = useState('');
-    const [company, setCompany] = useState('');
+    const [role, setRole] = useState('');
+    const [organization, setOrganization] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -36,10 +37,10 @@ const Signup = () => {
                 name,
                 username,
                 phoneNumber,
-                profession,
-                company
+                role,
+                organization
             });
-            navigate('/');
+            navigate('/create');
         } catch (err) {
             if (err.code === 'auth/email-already-in-use') {
                 setError('Email already in use.');
@@ -66,8 +67,8 @@ const Signup = () => {
                 <div className="container auth-container">
                     <div className="auth-left">
                         <div className="auth-header">
-                            <h1 className="auth-title">Create an Account</h1>
-                            <p className="auth-subtitle">Join us and start building today</p>
+                            <h1 className="auth-title">Organizer Account</h1>
+                            <p className="auth-subtitle">Accounts are only needed when you want to create and manage ATech activities.</p>
                         </div>
 
                         {error && <p style={{ color: 'red', marginBottom: '16px' }}>{error}</p>}
@@ -130,28 +131,30 @@ const Signup = () => {
                             </div>
 
                             <div className="form-group">
-                                <input
-                                    type="text"
+                                <select
                                     className="form-input"
-                                    placeholder="Profession"
-                                    value={profession}
-                                    onChange={(e) => setProfession(e.target.value)}
+                                    value={role}
+                                    onChange={(e) => setRole(e.target.value)}
                                     required
-                                />
+                                >
+                                    <option value="">Select role</option>
+                                    {ROLE_OPTIONS.map(option => <option key={option} value={option}>{option}</option>)}
+                                </select>
                             </div>
 
                             <div className="form-group">
                                 <input
                                     type="text"
                                     className="form-input"
-                                    placeholder="Company (optional)"
-                                    value={company}
-                                    onChange={(e) => setCompany(e.target.value)}
+                                    placeholder="Organisation / University"
+                                    value={organization}
+                                    onChange={(e) => setOrganization(e.target.value)}
+                                    required
                                 />
                             </div>
 
                             <button type="submit" className="btn btn-block btn-primary">
-                                Sign Up
+                            Create Organizer Account
                             </button>
                         </form>
 
@@ -159,7 +162,7 @@ const Signup = () => {
 
                         <button onClick={handleGoogleSignup} className="btn btn-block btn-google">
                             <FcGoogle size={20} style={{ marginRight: '8px' }} />
-                            Sign up with Google
+                            Continue with Google
                         </button>
 
                         <div className="auth-footer">
@@ -174,8 +177,8 @@ const Signup = () => {
                             className="auth-image"
                         />
                         <div className="auth-overlay">
-                            <h2 className="overlay-title">Join the Community</h2>
-                            <p className="overlay-text">Create your portfolio and get hired.</p>
+                            <h2 className="overlay-title">Organizer Portal</h2>
+                            <p className="overlay-text">Create programmes, manage reservations, and submit activities for ATech review.</p>
                         </div>
                     </div>
                 </div>

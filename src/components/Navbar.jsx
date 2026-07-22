@@ -262,7 +262,7 @@ const Navbar = () => {
         .filter(Boolean)
         .some(value => String(value).toLowerCase().includes(searchText));
 
-    const filteredExploreCount = !searchText
+    const filteredRegisterCount = !searchText
         ? seminars?.length || 0
         : (seminars || []).filter(item => includesSearch([
             item.title,
@@ -302,7 +302,7 @@ const Navbar = () => {
 
     const navSearchOptions = [
         { scope: 'all', label: 'All Users', count: filteredUserCount, icon: MdOutlineSearch },
-        { scope: 'explore', label: 'Explore', count: filteredExploreCount, icon: MdOutlineLocalActivity },
+        { scope: 'register', label: 'Register', count: filteredRegisterCount, icon: MdOutlineLocalActivity },
         { scope: 'trainers', label: 'Trainers', count: filteredTrainerCount, icon: MdOutlinePerson },
         { scope: 'collection', label: 'Collection', count: filteredCollectionCount, icon: MdOutlineFolderOpen },
     ];
@@ -316,8 +316,8 @@ const Navbar = () => {
         if (!value) return;
         setSearchOpen(false);
 
-        if (scope === 'explore' || (scope === 'all' && location.pathname === '/explore')) {
-            navigate(`/explore?search=${encodeURIComponent(value)}`);
+        if (scope === 'register' || (scope === 'all' && (location.pathname === '/register' || location.pathname === '/explore'))) {
+            navigate(`/register?search=${encodeURIComponent(value)}`);
         } else if (scope === 'trainers') {
             navigate(`/users?search=${encodeURIComponent(value)}&tag=Trainer`);
         } else if (scope === 'collection') {
@@ -340,9 +340,14 @@ const Navbar = () => {
 
                     <div className="nav-links">
                         <Link to="/" className="nav-link">Home</Link>
-                        <Link to="/explore" className="nav-link">Explore</Link>
-                        <Link to="/collection" className="nav-link">Collection</Link>
-                        <Link to="/create" className="nav-link">Create</Link>
+                        <Link to="/about" className="nav-link">About</Link>
+                        <Link to="/register" className="nav-link">Register</Link>
+                        <Link to="/trainers" className="nav-link">Trainers</Link>
+                        <Link to="/collection" className="nav-link">Publications</Link>
+                        <Link to="/corporate-training" className="nav-link">Corporate Training</Link>
+                        <Link to="/news-gallery" className="nav-link">News/Gallery</Link>
+                        <Link to="/contact" className="nav-link">Contact</Link>
+                        <Link to="/create" className="nav-link">Organizer Portal</Link>
                         {user && isVerified && <Link to="/dashboard" className="nav-link">Dashboard</Link>}
                     </div>
                 </div>
@@ -579,9 +584,9 @@ const Navbar = () => {
             <nav className="mobile-bottom-nav" aria-label="Mobile primary navigation">
                 {[
                     { to: '/', label: 'Home', icon: MdOutlineHome },
-                    { to: '/explore', label: 'Explore', icon: MdOutlineSearch },
-                    { to: '/collection', label: 'Collection', icon: MdOutlineFolderOpen },
-                    { to: '/create', label: 'Create', icon: MdOutlineAddCircleOutline },
+                    { to: '/register', label: 'Register', icon: MdOutlineSearch },
+                    { to: '/collection', label: 'Publications', icon: MdOutlineFolderOpen },
+                    { to: '/create', label: 'Organizer', icon: MdOutlineAddCircleOutline },
                 ].map(item => {
                     const Icon = item.icon;
                     const isActive = item.to === '/'
@@ -711,7 +716,7 @@ const Navbar = () => {
                                 {user ? (profile?.name || user.displayName || 'User') : 'Guest Explorer'}
                             </p>
                             <p style={{ fontSize: '13px', color: '#666666', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {user ? (profile?.email || user.email) : 'Log in or Sign Up to get started'}
+                                {user ? (profile?.email || user.email) : 'No login needed to browse and reserve seats'}
                             </p>
                         </div>
                         <MdOutlineKeyboardArrowRight size={24} color="#ccc" style={{ marginLeft: '8px', flexShrink: 0 }} />
@@ -721,7 +726,7 @@ const Navbar = () => {
 
                     {/* Section: Navigation (visible for all users, helps routing) */}
                     <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#414141', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        Explore
+                        Register
                     </div>
                     <div style={{ background: 'white', borderRadius: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                         <div 
@@ -733,11 +738,11 @@ const Navbar = () => {
                             <MdOutlineKeyboardArrowRight size={20} color="#ccc" style={{ flexShrink: 0 }} />
                         </div>
                         <div 
-                            onClick={() => { setDrawerOpen(false); navigate('/explore'); }}
+                            onClick={() => { setDrawerOpen(false); navigate('/register'); }}
                             style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }}
                         >
                             <MdOutlineSearch size={20} style={{ marginRight: '16px' }} />
-                            <span style={{ fontSize: '15px', fontWeight: '500', color: '#000000', flex: 1 }}>Explore</span>
+                            <span style={{ fontSize: '15px', fontWeight: '500', color: '#000000', flex: 1 }}>Register</span>
                             <MdOutlineKeyboardArrowRight size={20} color="#ccc" style={{ flexShrink: 0 }} />
                         </div>
                         <div 
@@ -745,7 +750,7 @@ const Navbar = () => {
                             style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }}
                         >
                             <MdOutlineFolderOpen size={20} style={{ marginRight: '16px' }} />
-                            <span style={{ fontSize: '15px', fontWeight: '500', color: '#000000', flex: 1 }}>Collection</span>
+                            <span style={{ fontSize: '15px', fontWeight: '500', color: '#000000', flex: 1 }}>Publications</span>
                             <MdOutlineKeyboardArrowRight size={20} color="#ccc" style={{ flexShrink: 0 }} />
                         </div>
                         <div 
@@ -753,7 +758,7 @@ const Navbar = () => {
                             style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', borderBottom: user && isVerified ? '1px solid #f3f4f6' : 'none', cursor: 'pointer' }}
                         >
                             <MdOutlineAddCircleOutline size={20} style={{ marginRight: '16px' }} />
-                            <span style={{ fontSize: '15px', fontWeight: '600', color: '#000000', flex: 1 }}>Create</span>
+                            <span style={{ fontSize: '15px', fontWeight: '600', color: '#000000', flex: 1 }}>Organizer Portal</span>
                             <MdOutlineKeyboardArrowRight size={20} color="#ccc" style={{ flexShrink: 0 }} />
                         </div>
                         {user && isVerified && (
@@ -946,7 +951,7 @@ const Navbar = () => {
                                     }}
                                 >
                                     <MdOutlinePerson size={20} style={{ marginRight: '16px' }} />
-                                    <span style={{ fontSize: '15px', fontWeight: '500', color: '#000000', flex: 1 }}>Sign Up</span>
+                                    <span style={{ fontSize: '15px', fontWeight: '500', color: '#000000', flex: 1 }}>Organizer Sign Up</span>
                                     <MdOutlineKeyboardArrowRight size={20} color="#ccc" style={{ flexShrink: 0 }} />
                                 </div>
                             </>

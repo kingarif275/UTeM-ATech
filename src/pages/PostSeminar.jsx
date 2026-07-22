@@ -6,8 +6,9 @@ import { auth, storage } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ensureUserProfile } from '../utils/userProfiles';
+import { PROGRAMME_STATUSES, TRAINING_CATEGORIES } from '../data/atechContent';
 
-const generateGoogleMeetLink = () => {
+const generateMicrosoftTeamsLink = () => {
     const chars = 'abcdefghijklmnopqrstuvwxyz';
     const randStr = (len) => {
         let res = '';
@@ -16,7 +17,7 @@ const generateGoogleMeetLink = () => {
         }
         return res;
     };
-    return `https://meet.google.com/${randStr(3)}-${randStr(4)}-${randStr(3)}`;
+    return `https://teams.microsoft.com/l/meetup-join/${randStr(8)}-${randStr(4)}-${randStr(4)}`;
 };
 
 const FilePicker = ({ label, file, onChange }) => {
@@ -86,10 +87,10 @@ const PostSeminar = () => {
                         setUserData(profile);
                     } else {
                         alert("Only verified trainers/organizers can host activities.");
-                        navigate('/explore');
+                        navigate('/register');
                     }
                 }).catch(() => {
-                    navigate('/explore');
+                    navigate('/register');
                 });
             }
         });
@@ -114,11 +115,24 @@ const PostSeminar = () => {
     const [seminarData, setSeminarData] = useState({
         title: '',
         type: initialType,
+        category: TRAINING_CATEGORIES[0],
+        programmeStatus: 'Open',
+        courseCode: '',
         description: '',
-        locationType: 'Google Meet', // default online
+        overview: '',
+        learningOutcomes: '',
+        audience: '',
+        topics: '',
+        requirements: '',
+        closingDate: '',
+        included: '',
+        hrdCorpClaimable: false,
+        level: 'Professional',
+        locationType: 'Microsoft Teams',
         location: '',
         priceType: 'Free',
         price: '',
+        studentPrice: '',
         sessions: [
             { name: 'Session 1', date: '', startTime: '', endTime: '', quota: '' }
         ]
@@ -248,7 +262,7 @@ const PostSeminar = () => {
             }
         }
 
-        const generatedMeetLink = seminarData.locationType === 'Google Meet' ? generateGoogleMeetLink() : '';
+        const generatedMeetingLink = seminarData.locationType === 'Microsoft Teams' ? generateMicrosoftTeamsLink() : '';
 
         let sessions = [];
         let seminarFileUrl = '';
@@ -301,11 +315,24 @@ const PostSeminar = () => {
         const finalData = {
             title: seminarData.title,
             type: seminarData.type,
+            category: seminarData.category,
+            programmeStatus: seminarData.programmeStatus,
+            courseCode: seminarData.courseCode,
             description: seminarData.description,
-            locationType: seminarData.locationType, // 'Google Meet' or 'Physical'
-            location: seminarData.locationType === 'Google Meet' ? generatedMeetLink : seminarData.location,
-            meetLink: seminarData.locationType === 'Google Meet' ? generatedMeetLink : '',
+            overview: seminarData.overview,
+            learningOutcomes: seminarData.learningOutcomes,
+            audience: seminarData.audience,
+            topics: seminarData.topics,
+            requirements: seminarData.requirements,
+            closingDate: seminarData.closingDate,
+            included: seminarData.included,
+            hrdCorpClaimable: seminarData.hrdCorpClaimable,
+            level: seminarData.level,
+            locationType: seminarData.locationType,
+            location: seminarData.locationType === 'Microsoft Teams' ? generatedMeetingLink : seminarData.location,
+            meetLink: seminarData.locationType === 'Microsoft Teams' ? generatedMeetingLink : '',
             price: seminarData.priceType === 'Free' ? 0 : Number(seminarData.price),
+            studentPrice: seminarData.priceType === 'Free' ? 0 : Number(seminarData.studentPrice || seminarData.price || 0),
             sessionType: sessionType,
             startDate: sessionType === 'one_time' ? oneTimeData.startDate : '',
             endDate: sessionType === 'one_time' ? oneTimeData.endDate : '',
@@ -325,7 +352,7 @@ const PostSeminar = () => {
             await addSeminar(finalData);
             console.log("[PostSeminar] Successfully saved seminar data.");
             setUploading(false);
-            window.location.href = '/explore';
+            window.location.href = '/register';
         } catch (error) {
             console.error("[PostSeminar] Error caught from addSeminar:", error);
             setUploading(false);
@@ -374,6 +401,51 @@ const PostSeminar = () => {
                             <option value="Event">Event</option>
                             <option value="Meetup">Meetup</option>
                         </select>
+                    </div>
+
+                    <div className="form-grid-2">
+                        <div className="form-group">
+                            <label className="form-label">Training Category</label>
+                            <select
+                                className="form-input"
+                                value={seminarData.category}
+                                onChange={e => setSeminarData({ ...seminarData, category: e.target.value })}
+                            >
+                                {TRAINING_CATEGORIES.map(category => <option key={category} value={category}>{category}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Programme Status</label>
+                            <select
+                                className="form-input"
+                                value={seminarData.programmeStatus}
+                                onChange={e => setSeminarData({ ...seminarData, programmeStatus: e.target.value })}
+                            >
+                                {PROGRAMME_STATUSES.map(status => <option key={status} value={status}>{status}</option>)}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="form-grid-2">
+                        <div className="form-group">
+                            <label className="form-label">Course Code</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                placeholder="e.g. ATECH-MINITAB-2026"
+                                value={seminarData.courseCode}
+                                onChange={e => setSeminarData({ ...seminarData, courseCode: e.target.value })}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Registration Closing Date</label>
+                            <input
+                                type="date"
+                                className="form-input"
+                                value={seminarData.closingDate}
+                                onChange={e => setSeminarData({ ...seminarData, closingDate: e.target.value })}
+                            />
+                        </div>
                     </div>
 
                     {/* Session Type Switcher */}
@@ -611,7 +683,7 @@ const PostSeminar = () => {
                                 position: 'absolute',
                                 top: '4px',
                                 bottom: '4px',
-                                left: seminarData.locationType === 'Google Meet' ? '4px' : 'calc(50%)',
+                                left: seminarData.locationType === 'Microsoft Teams' ? '4px' : 'calc(50%)',
                                 width: 'calc(50% - 4px)',
                                 background: '#ffffff',
                                 borderRadius: '8px',
@@ -621,7 +693,7 @@ const PostSeminar = () => {
                             }} />
                             <button
                                 type="button"
-                                onClick={() => setSeminarData({ ...seminarData, locationType: 'Google Meet', location: '' })}
+                                onClick={() => setSeminarData({ ...seminarData, locationType: 'Microsoft Teams', location: '' })}
                                 style={{
                                     position: 'relative',
                                     zIndex: 2,
@@ -631,14 +703,14 @@ const PostSeminar = () => {
                                     padding: '8px 0',
                                     fontSize: '14px',
                                     fontWeight: '600',
-                                    color: seminarData.locationType === 'Google Meet' ? '#111827' : '#6b7280',
+                                    color: seminarData.locationType === 'Microsoft Teams' ? '#111827' : '#6b7280',
                                     cursor: 'pointer',
                                     borderRadius: '8px',
                                     transition: 'color 0.2s',
                                     fontFamily: 'inherit',
                                 }}
                             >
-                                Online (Google Meet)
+                                Online (Microsoft Teams)
                             </button>
                             <button
                                 type="button"
@@ -746,20 +818,42 @@ const PostSeminar = () => {
                             </button>
                         </div>
                         {seminarData.priceType === 'Paid' && (
-                            <div style={{ position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontWeight: 'bold' }}>RM</span>
-                                <input
-                                    type="number"
-                                    className="form-input"
-                                    placeholder="0.00"
-                                    style={{ paddingLeft: '44px' }}
-                                    required
-                                    min="0"
-                                    value={seminarData.price}
-                                    onChange={e => setSeminarData({ ...seminarData, price: e.target.value })}
-                                />
+                            <div className="form-grid-2">
+                                <div style={{ position: 'relative' }}>
+                                    <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontWeight: 'bold' }}>RM</span>
+                                    <input
+                                        type="number"
+                                        className="form-input"
+                                        placeholder="Non-student fee"
+                                        style={{ paddingLeft: '44px' }}
+                                        required
+                                        min="0"
+                                        value={seminarData.price}
+                                        onChange={e => setSeminarData({ ...seminarData, price: e.target.value })}
+                                    />
+                                </div>
+                                <div style={{ position: 'relative' }}>
+                                    <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontWeight: 'bold' }}>RM</span>
+                                    <input
+                                        type="number"
+                                        className="form-input"
+                                        placeholder="Student fee"
+                                        style={{ paddingLeft: '44px' }}
+                                        min="0"
+                                        value={seminarData.studentPrice}
+                                        onChange={e => setSeminarData({ ...seminarData, studentPrice: e.target.value })}
+                                    />
+                                </div>
                             </div>
                         )}
+                        <label style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '12px', fontWeight: 700, color: '#374151' }}>
+                            <input
+                                type="checkbox"
+                                checked={seminarData.hrdCorpClaimable}
+                                onChange={e => setSeminarData({ ...seminarData, hrdCorpClaimable: e.target.checked })}
+                            />
+                            HRD Corp claim support where applicable
+                        </label>
                     </div>
 
                     {/* Event Banner */}
@@ -908,6 +1002,60 @@ const PostSeminar = () => {
                             onChange={e => setSeminarData({ ...seminarData, description: e.target.value })}
                             placeholder="Describe what attendees will learn..."
                         ></textarea>
+                    </div>
+
+                    <div className="form-grid-2">
+                        <div className="form-group">
+                            <label className="form-label">Learning Outcomes</label>
+                            <textarea
+                                className="form-input"
+                                rows="4"
+                                value={seminarData.learningOutcomes}
+                                onChange={e => setSeminarData({ ...seminarData, learningOutcomes: e.target.value })}
+                                placeholder="List what participants will be able to do after the programme."
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Who Should Attend</label>
+                            <textarea
+                                className="form-input"
+                                rows="4"
+                                value={seminarData.audience}
+                                onChange={e => setSeminarData({ ...seminarData, audience: e.target.value })}
+                                placeholder="Students, engineers, technicians, lecturers, industry teams..."
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-grid-2">
+                        <div className="form-group">
+                            <label className="form-label">Topics / Programme Outline</label>
+                            <textarea
+                                className="form-input"
+                                rows="4"
+                                value={seminarData.topics}
+                                onChange={e => setSeminarData({ ...seminarData, topics: e.target.value })}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">Preparation / Requirements</label>
+                            <textarea
+                                className="form-input"
+                                rows="4"
+                                value={seminarData.requirements}
+                                onChange={e => setSeminarData({ ...seminarData, requirements: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Fee Includes</label>
+                        <input
+                            className="form-input"
+                            value={seminarData.included}
+                            onChange={e => setSeminarData({ ...seminarData, included: e.target.value })}
+                            placeholder="e.g. training notes, certificate of participation, hands-on exercises"
+                        />
                     </div>
 
                     <div style={{ marginTop: '32px', textAlign: 'right' }}>

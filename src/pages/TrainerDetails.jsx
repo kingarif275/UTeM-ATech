@@ -13,7 +13,7 @@ const trainerToProfile = (trainer) => ({
     pfpUrl: trainer.photo && trainer.photo !== 'placeholder' ? trainer.photo : '',
     bannerColor: trainer.banner || '#dbeafe',
     roles: trainer.isCertified
-        ? ['Expert Trainer', 'Certified Trainer', 'Lecturer']
+        ? ['ATech Expert Trainer', 'Lecturer']
         : ['Trainer'],
     faculties: trainer.isCertified ? [trainer.faculty || FTKE_FACULTY] : [],
     about: trainer.description || 'No about section has been added yet.',
@@ -24,8 +24,7 @@ const trainerToProfile = (trainer) => ({
     experience: trainer.title ? [trainer.title] : [],
     showCertifications: trainer.isCertified || trainer.isAccredited,
     certifications: [
-        trainer.isCertified ? 'Certified Trainer' : null,
-        trainer.isAccredited ? 'Accredited Trainer' : null
+        trainer.isCertified || trainer.isAccredited ? 'ATech Expert Trainer' : null
     ].filter(Boolean)
 });
 
