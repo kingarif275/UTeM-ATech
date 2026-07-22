@@ -14,7 +14,7 @@ const SeminarRegistration = () => {
     const { state } = useLocation();
     const { id } = useParams();
     const navigate = useNavigate();
-    const { registerForSeminar, seminars, loading } = useSeminars();
+    const { registerForSeminar, seminars, loading, getUserActivities } = useSeminars();
     const seminar = state?.seminar || seminars.find(item => item.id === id);
     const isOnline = isOnlineActivity(seminar);
     const displayLocation = isOnline ? 'Online' : (seminar?.location || 'Venue TBA');
@@ -36,6 +36,7 @@ const SeminarRegistration = () => {
     const [selectedSessionIndices, setSelectedSessionIndices] = useState([]);
     const [submitError, setSubmitError] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [existingRsvps, setExistingRsvps] = useState([]);
 
     React.useEffect(() => {
         document.title = 'UTeM ATech - Register for Activity';
@@ -57,10 +58,19 @@ const SeminarRegistration = () => {
                     role: prev.role || profile?.role || profile?.profession || '',
                     organization: prev.organization || profile?.organization || profile?.company || ''
                 }));
+                try {
+                    const activities = await getUserActivities(currentUser.uid);
+                    setExistingRsvps(activities.filter(activity => activity.seminarId === id));
+                } catch (error) {
+                    console.warn('Could not check existing RSVPs:', error);
+                    setExistingRsvps([]);
+                }
+            } else {
+                setExistingRsvps([]);
             }
         });
         return () => unsubscribe();
-    }, []);
+    }, [getUserActivities, id]);
 
     if (loading) {
         return (
@@ -399,6 +409,23 @@ const SeminarRegistration = () => {
                         </p>
                     )}
                 </div>
+
+                {existingRsvps.length > 0 && (
+                    <div style={{
+                        background: '#eff6ff',
+                        border: '1px solid #bfdbfe',
+                        color: '#0b2d5c',
+                        borderRadius: '16px',
+                        padding: '16px 18px',
+                        marginBottom: '24px',
+                        lineHeight: 1.55
+                    }}>
+                        <strong>You already RSVP&apos;d for this activity.</strong>
+                        <p style={{ margin: '4px 0 0' }}>
+                            You can still submit another RSVP if you are registering someone else.
+                        </p>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="profile-card" style={{ padding: '32px' }}>
                     {submitError && (

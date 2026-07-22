@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import PageTitle from '../components/PageTitle';
 import { useTrainers } from '../context/TrainerContext';
 
 const TrainerProfiles = () => {
@@ -32,14 +33,9 @@ const TrainerProfiles = () => {
             <Navbar />
             
             <div className="container page-content" style={{ paddingBottom: '60px' }}>
-                <header style={{ marginBottom: '48px', textAlign: 'center' }}>
-                    <h1 className="hero-title" style={{ fontSize: '48px', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '16px' }}>
-                        Trainer and Organizer
-                    </h1>
-                    <p className="hero-subtitle" style={{ fontSize: '20px', color: 'var(--text-light)', maxWidth: '700px', margin: '0 auto' }}>
+                <PageTitle eyebrow="ATech Experts" title="Trainers" align="center">
                         Meet the industry leaders and academic pioneers who guide our training programs with expertise and passion.
-                    </p>
-                </header>
+                </PageTitle>
 
                 <div className="grid-container" style={{ 
                     display: 'grid', 

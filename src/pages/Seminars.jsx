@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ActivityCard from '../components/ActivityCard';
+import PageTitle from '../components/PageTitle';
 import { useSeminars } from '../context/SeminarContext';
 import { parseSessionDate } from '../utils/notifications';
 import { LAUNCH_PROGRAMME, QUICK_TRAINING_FILTERS, TRAINING_CATEGORIES } from '../data/atechContent';
@@ -100,26 +101,10 @@ const Seminars = () => {
         <div style={{ minHeight: '100vh', background: '#ffffff' }}>
             <Navbar />
             <div className="container page-content" style={{ paddingTop: '100px', paddingBottom: '60px' }}>
-                <header style={{ textAlign: 'left', marginBottom: '48px' }}>
-                    <h1 className="hero-title" style={{
-                        fontSize: '48px',
-                        fontWeight: '800',
-                        marginBottom: '14px',
-                        color: 'var(--text-dark)',
-                        letterSpacing: '-0.03em',
-                    }}>
-                        Register
-                    </h1>
-                    <p className="hero-subtitle" style={{
-                        fontSize: '18px',
-                        color: 'var(--text-light)',
-                        marginBottom: '36px',
-                        maxWidth: '640px',
-                        margin: '0 0 36px',
-                        lineHeight: '1.6',
-                    }}>
+                <header style={{ marginBottom: '48px' }}>
+                    <PageTitle eyebrow="Training Registration" title="Register">
                         Reserve seats for ATech Verified training, workshops, seminars, and engineering programmes.
-                    </p>
+                    </PageTitle>
 
                     <div style={{ width: '100%', margin: '0 0 24px', position: 'relative' }}>
                         <input

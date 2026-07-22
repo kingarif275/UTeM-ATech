@@ -125,13 +125,22 @@ const Home = () => {
                     <div className="container">
                         <SectionHeader title="Meet Our Trainers" action="View All Trainers" onClick={() => navigate('/trainers')} dark />
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-                            {(featuredTrainers.length ? featuredTrainers : [{ name: LAUNCH_PROGRAMME.trainer, title: 'ATech Expert Trainer', description: LAUNCH_PROGRAMME.category }]).map(trainer => (
-                                <article key={trainer.id || trainer.name} style={{ border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', padding: '18px', background: 'rgba(255,255,255,0.06)' }}>
-                                    {trainer.image && <img src={trainer.image} alt={trainer.name} style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', marginBottom: '14px' }} />}
-                                    <h3 style={{ margin: '0 0 6px', fontWeight: 900 }}>{trainer.name}</h3>
-                                    <p style={{ margin: 0, color: '#bfdbfe' }}>{trainer.title || 'ATech Expert Trainer'}</p>
-                                </article>
-                            ))}
+                            {(featuredTrainers.length ? featuredTrainers : [{ name: LAUNCH_PROGRAMME.trainer, title: 'ATech Expert Trainer', description: LAUNCH_PROGRAMME.category }]).map(trainer => {
+                                const photo = trainer.photo && trainer.photo !== 'placeholder' ? trainer.photo : trainer.image || '';
+                                return (
+                                    <article key={trainer.id || trainer.name} style={{ border: '1px solid rgba(255,255,255,0.18)', borderRadius: '8px', padding: '18px', background: 'rgba(255,255,255,0.06)' }}>
+                                        {photo ? (
+                                            <img src={photo} alt={trainer.name} style={{ width: '84px', height: '84px', borderRadius: '50%', objectFit: 'cover', marginBottom: '14px', border: '2px solid rgba(255,255,255,0.35)' }} />
+                                        ) : (
+                                            <div style={{ width: '84px', height: '84px', borderRadius: '50%', marginBottom: '14px', background: '#f47a20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', fontWeight: 900 }}>
+                                                {trainer.name?.split(' ').map(part => part[0]).join('').slice(0, 2) || 'AT'}
+                                            </div>
+                                        )}
+                                        <h3 style={{ margin: '0 0 6px', fontWeight: 900 }}>{trainer.name}</h3>
+                                        <p style={{ margin: 0, color: '#bfdbfe' }}>{trainer.title || 'ATech Expert Trainer'}</p>
+                                    </article>
+                                );
+                            })}
                         </div>
                     </div>
                 </section>

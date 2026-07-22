@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import PageTitle from '../components/PageTitle';
 import { useSeminars } from '../context/SeminarContext';
 import { auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -79,14 +80,9 @@ const Sources = () => {
         <div style={{ background: '#ffffff', minHeight: '100vh' }}>
             <Navbar />
             <div className="container" style={{ paddingTop: '120px', paddingBottom: '80px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px', marginBottom: '40px' }}>
-                    <div style={{ textAlign: 'left', maxWidth: '600px' }}>
-                        <h1 style={{ fontSize: '40px', fontWeight: '700', marginBottom: '12px' }}>Sources & Documents</h1>
-                        <p style={{ fontSize: '18px', color: '#666666' }}>
-                            Explore academic and technical resources shared by certified trainers.
-                        </p>
-                    </div>
-                </div>
+                <PageTitle eyebrow="ATech Publications" title="Publications">
+                    Explore academic and technical resources shared by ATech trainers and contributors.
+                </PageTitle>
 
                 {/* Filters Row */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>

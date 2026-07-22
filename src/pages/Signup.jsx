@@ -40,7 +40,7 @@ const Signup = () => {
                 role,
                 organization
             });
-            navigate('/create');
+            navigate('/');
         } catch (err) {
             if (err.code === 'auth/email-already-in-use') {
                 setError('Email already in use.');
@@ -67,8 +67,8 @@ const Signup = () => {
                 <div className="container auth-container">
                     <div className="auth-left">
                         <div className="auth-header">
-                            <h1 className="auth-title">Organizer Account</h1>
-                            <p className="auth-subtitle">Accounts are only needed when you want to create and manage ATech activities.</p>
+                            <h1 className="auth-title">Create an Account</h1>
+                            <p className="auth-subtitle">Use one account for training registrations, activity tracking, and organizer tools.</p>
                         </div>
 
                         {error && <p style={{ color: 'red', marginBottom: '16px' }}>{error}</p>}
@@ -154,7 +154,7 @@ const Signup = () => {
                             </div>
 
                             <button type="submit" className="btn btn-block btn-primary">
-                            Create Organizer Account
+                                Create Account
                             </button>
                         </form>
 
@@ -177,8 +177,8 @@ const Signup = () => {
                             className="auth-image"
                         />
                         <div className="auth-overlay">
-                            <h2 className="overlay-title">Organizer Portal</h2>
-                            <p className="overlay-text">Create programmes, manage reservations, and submit activities for ATech review.</p>
+                            <h2 className="overlay-title">ATech UTeM Account</h2>
+                            <p className="overlay-text">Track your training activities and request organizer access when needed.</p>
                         </div>
                     </div>
                 </div>

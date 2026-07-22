@@ -48,12 +48,7 @@ const Login = () => {
                     <div className="auth-left">
                         <div className="auth-header">
                             <h1 className="auth-title">Welcome to ATech UTeM</h1>
-                            <p className="auth-subtitle">Access your training activities, registrations, and organizer tools.</p>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '22px' }}>
-                            <button type="button" className="nav-btn-outline" onClick={() => navigate('/my-activities')}>Attendee Login</button>
-                            <button type="button" className="nav-btn-outline" onClick={() => navigate('/dashboard')}>Organizer Login</button>
+                            <p className="auth-subtitle">Sign in once to access training activities, registrations, and organizer tools.</p>
                         </div>
 
                         {error && <p style={{ color: 'red', marginBottom: '16px' }}>{error}</p>}
@@ -100,7 +95,7 @@ const Login = () => {
                         </button>
 
                         <div className="auth-footer">
-                            Creating activities? <Link to="/signup" className="auth-link">Create organizer account</Link>
+                            New to ATech UTeM? <Link to="/signup" className="auth-link">Create an account</Link>
                         </div>
                     </div>
 
